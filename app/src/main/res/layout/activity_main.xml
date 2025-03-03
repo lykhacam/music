@@ -71,16 +71,17 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="#C1BBBB"/>
 
-        <ImageButton
-            android:id="@+id/imgLike"
-            android:src="@drawable/ic_heart_image"
-
-            android:layout_width="wrap_content"
+        <CheckBox
+            android:id="@+id/cbLike"
+            android:layout_width="@dimen/_24sdp"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
+            android:button="@null"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableStart="@drawable/ic_heart_image"
+            android:checked="false"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:layout_constraintEnd_toEndOf="parent"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <SeekBar
@@ -128,7 +129,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ctl2"
+        android:id="@+id/ctlProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
