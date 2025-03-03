@@ -134,26 +134,30 @@ class Screen4Activity : AppCompatActivity(){
         isPlaying = true
         binding.btnPlay.setImageResource(R.drawable.pause)
 
-        timer = Timer()
-        timer?.schedule(object : TimerTask() {
-            override fun run() {
-                runOnUiThread {
-                    if (isPlaying && currentProgress < TOTAL_TIME) {
-                        currentProgress++
-                        binding.sbPlay.progress = currentProgress
-                        binding.tvCurrentTime.text = formatTime(currentProgress)
-                    } else {
-                        clickPause()
+        if(timer==null){
+            timer = Timer()
+            timer?.schedule(object : TimerTask() {
+                override fun run() {
+                    runOnUiThread {
+                        if (isPlaying && currentProgress < TOTAL_TIME) {
+                            currentProgress++
+                            binding.sbPlay.progress = currentProgress
+                            binding.tvCurrentTime.text = formatTime(currentProgress)
+                        } else {
+                            clickPause()
+                        }
                     }
                 }
-            }
-        }, 0, 1000)
+            }, 0, 1000)
+        }
+
     }
 
     private fun clickPause() {
         isPlaying = false
         binding.btnPlay.setImageResource(R.drawable.play)
         timer?.cancel()
+        timer = null
     }
 
     private fun formatTime(seconds: Int): String {
