@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginEnd="12dp">
+
+<ImageView
+        android:id="@+id/playlistImage"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/sample_playlist"
+        android:background="@drawable/image_round"
+        android:clipToOutline="true"/>
+
+    <TextView
+        android:id="@+id/playlistName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RvB Playlist"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/playlistDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chill your mind"
+        android:textColor="#AAAAAA"
+        android:textSize="12sp"/>
+
+</LinearLayout>
