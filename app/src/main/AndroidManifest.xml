@@ -16,6 +16,9 @@
             android:name="com.example.myapplication.View.S1Activity"
             android:exported="false" />
         <activity
+            android:name="com.example.myapplication.View.S3Activity"
+            android:exported="false" />
+        <activity
             android:name="com.example.myapplication.View.S4Activity"
             android:exported="false" />
         <activity

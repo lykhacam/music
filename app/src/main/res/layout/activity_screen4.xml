@@ -10,7 +10,7 @@
     android:paddingStart="@dimen/_20sdp"
     android:paddingEnd="@dimen/_20sdp"
     android:paddingBottom="@dimen/_40sdp"
-    tools:context="com.example.musicapp.View.S4Activity">
+    tools:context="com.example.myapplication.View.S4Activity">
 
     <ImageButton
         android:id="@+id/btnBack"

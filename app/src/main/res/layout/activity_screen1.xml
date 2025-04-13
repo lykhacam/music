@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_s1_image"
-    tools:context="com.example.musicapp.View.S1Activity">
+    tools:context="com.example.myapplication.View.S1Activity">
 
     <!-- Title -->
     <TextView

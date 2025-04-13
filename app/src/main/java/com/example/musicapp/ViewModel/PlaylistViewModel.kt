@@ -1,4 +1,4 @@
-package com.example.myapplication.viewmodel
+package com.example.myapplication.ViewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -7,8 +7,9 @@ import com.example.myapplication.R
 import com.example.myapplication.model.Playlist
 
 class PlaylistViewModel : ViewModel() {
+
     private val _playlists = MutableLiveData<List<Playlist>>()
-    val playlists: LiveData<List<Playlist>> get() = _playlists
+    val playlists: LiveData<List<Playlist>> = _playlists
 
     init {
         loadPlaylists()
@@ -16,10 +17,12 @@ class PlaylistViewModel : ViewModel() {
 
     private fun loadPlaylists() {
         _playlists.value = listOf(
-            Playlist("Chill Vibes", "Relaxing & soft music", R.drawable.sample_playlist),
-            Playlist("Top Hits", "Most played songs", R.drawable.sample_playlist),
-            Playlist("Workout", "Energetic beats", R.drawable.sample_playlist),
-            Playlist("Lo-Fi Beats", "Study & focus music", R.drawable.sample_playlist)
+            Playlist("Morning Vibes", "Start your day fresh", R.drawable.sample_playlist),
+            Playlist("Workout Hits", "Energy booster songs", R.drawable.sample_playlist),
+            Playlist("Chill Zone", "Relax and unwind", R.drawable.sample_playlist),
+            Playlist("Morning Vibes", "Start your day fresh", R.drawable.sample_playlist),
+            Playlist("Workout Hits", "Energy booster songs", R.drawable.sample_playlist),
+            Playlist("Chill Zone", "Relax and unwind", R.drawable.sample_playlist),
         )
     }
 }
