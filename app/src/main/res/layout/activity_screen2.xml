@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="Welcome back!"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_24ssp"
+        android:textSize="@dimen/_16ssp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,23 +27,23 @@
         android:layout_height="wrap_content"
         android:text="What do you feel like today?"
         android:textColor="#BBBBBB"
-        android:textSize="@dimen/_14ssp"
+        android:textSize="@dimen/_8ssp"
         app:layout_constraintTop_toBottomOf="@id/welcomeText"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_8sdp" />
+        android:layout_marginTop="@dimen/_4sdp" />
 
     <!-- Search Bar -->
     <EditText
         android:id="@+id/searchBar"
         android:layout_width="0dp"
-        android:layout_height="@dimen/_48sdp"
+        android:layout_height="@dimen/_28sdp"
         android:hint="Search song, playlist, artist..."
         android:background="@drawable/search_bg"
         android:paddingStart="@dimen/_16sdp"
         android:paddingEnd="@dimen/_16sdp"
-        android:textColor="@android:color/white"
-        android:textColorHint="#888888"
+        android:textColor="@color/purple2"
+        android:textColorHint="@color/purple2"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:drawablePadding="@dimen/_8sdp"
         app:layout_constraintTop_toBottomOf="@id/subText"
@@ -51,7 +51,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="@dimen/_16sdp"
         android:layout_marginEnd="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_16sdp"/>
+        android:layout_marginTop="@dimen/_8sdp"
+    />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
@@ -67,14 +68,14 @@
         app:layout_constraintTop_toBottomOf="@id/searchBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="@dimen/_16sdp"/>
+        android:layout_marginTop="@dimen/_8sdp"/>
 
     <!-- ViewPager2 để chứa các Fragment -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_8sdp"
         app:layout_constraintTop_toBottomOf="@id/tabLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
