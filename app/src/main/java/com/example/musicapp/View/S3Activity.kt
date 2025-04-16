@@ -25,7 +25,7 @@ class S3Activity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Nhận dữ liệu từ Intent và hiển thị ảnh playlist nếu có
+        // Nhận dữ liệu từ Intent và hiển thị ảnh playlist
         val imageRes = intent.getIntExtra("playlist_image", -1)
         if (imageRes != -1) {
             binding.imgPlaylist.setImageResource(imageRes)
@@ -50,8 +50,7 @@ class S3Activity : AppCompatActivity() {
     }
 
     private fun loadSongs() {
-        // Nếu bạn có danh sách bài hát thật theo playlist, hãy load theo name từ intent
-        // Ở đây là danh sách cứng (dummy)
+        // Danh sách cứng
         songAdapter.setData(getDummySongs())
     }
 

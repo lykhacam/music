@@ -17,7 +17,7 @@ class S1Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.continueButton.setOnClickListener {
-            val intent = Intent(this, S4Activity::class.java)
+            val intent = Intent(this, S2Activity::class.java)
             startActivity(intent)
         }
     }

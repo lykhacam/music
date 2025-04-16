@@ -9,11 +9,12 @@
     <!-- Horizontal Playlist -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playListRecycler"
-        android:layout_width="0dp"
-        android:layout_height="140dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/_130sdp"
         android:clipToPadding="false"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/_16sdp"
+        android:paddingEnd="@dimen/_16sdp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -25,21 +26,21 @@
         android:layout_height="wrap_content"
         android:text="Your favourites"
         android:textColor="@android:color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/_18ssp"
         android:textStyle="bold"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/_8sdp"
         app:layout_constraintTop_toBottomOf="@id/playListRecycler"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp"/>
+        android:layout_marginStart="@dimen/_16sdp"/>
 
     <!-- Favourites List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/favRecycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:paddingStart="@dimen/_16sdp"
+        android:paddingEnd="@dimen/_16sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/favText"
