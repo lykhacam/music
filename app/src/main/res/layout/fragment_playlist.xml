@@ -7,10 +7,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playListRecycler"
         android:layout_width="0dp"
-        android:layout_height="140dp"
+        android:layout_height="@dimen/_140sdp"
         android:clipToPadding="false"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/_16sdp"
+        android:paddingEnd="@dimen/_16sdp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

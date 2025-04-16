@@ -44,6 +44,6 @@
         android:layout_height="wrap_content"
         android:text="2:09"
         android:textColor="#AAAAAA"
-        android:textSize="12sp"/>
+        android:textSize="@dimen/_12ssp"/>
 
 </LinearLayout>

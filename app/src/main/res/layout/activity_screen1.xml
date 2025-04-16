@@ -7,13 +7,12 @@
     android:background="@drawable/background_s1_image"
     tools:context="com.example.myapplication.View.S1Activity">
 
-    <!-- Title -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Feel the beat"
-        android:textSize="24sp"
+        android:textSize="@dimen/_24ssp"
         android:textStyle="bold"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@id/subtitleText"
@@ -21,7 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Subtitle -->
     <TextView
         android:id="@+id/subtitleText"
         android:layout_width="wrap_content"

@@ -6,7 +6,6 @@
     android:background="@android:color/transparent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Horizontal Playlist -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playListRecycler"
         android:layout_width="match_parent"
@@ -19,7 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Your favourites -->
     <TextView
         android:id="@+id/favText"
         android:layout_width="wrap_content"
@@ -33,7 +31,6 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="@dimen/_16sdp"/>
 
-    <!-- Favourites List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/favRecycler"
         android:layout_width="0dp"

@@ -8,52 +8,50 @@
     android:background="@drawable/bg_gradient"
     tools:context="com.example.myapplication.View.S2Activity">
 
-    <!-- Welcome Text -->
     <TextView
         android:id="@+id/welcomeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Welcome back!"
         android:textColor="@android:color/white"
-        android:textSize="24sp"
+        android:textSize="@dimen/_24ssp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="16dp" />
+        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_marginStart="@dimen/_16sdp" />
 
-    <!-- Subtext -->
     <TextView
         android:id="@+id/subText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="What do you feel like today?"
         android:textColor="#BBBBBB"
-        android:textSize="14sp"
+        android:textSize="@dimen/_14ssp"
         app:layout_constraintTop_toBottomOf="@id/welcomeText"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_8sdp" />
 
     <!-- Search Bar -->
     <EditText
         android:id="@+id/searchBar"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/_48sdp"
         android:hint="Search song, playlist, artist..."
         android:background="@drawable/search_bg"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/_16sdp"
+        android:paddingEnd="@dimen/_16sdp"
         android:textColor="@android:color/white"
         android:textColorHint="#888888"
         android:drawableStart="@android:drawable/ic_menu_search"
-        android:drawablePadding="8dp"
+        android:drawablePadding="@dimen/_8sdp"
         app:layout_constraintTop_toBottomOf="@id/subText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginEnd="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_16sdp"/>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
@@ -63,13 +61,13 @@
         app:tabIndicatorColor="@android:color/white"
         app:tabSelectedTextColor="@android:color/white"
         app:tabTextColor="#AAAAAA"
-        app:tabIndicatorHeight="3dp"
+        app:tabIndicatorHeight="@dimen/_3sdp"
         app:tabMode="scrollable"
         app:tabGravity="fill"
         app:layout_constraintTop_toBottomOf="@id/searchBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="@dimen/_16sdp"/>
 
     <!-- ViewPager2 để chứa các Fragment -->
     <androidx.viewpager2.widget.ViewPager2
