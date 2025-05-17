@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="@android:color/transparent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@android:color/transparent">
 
     <!-- Horizontal Playlist -->
     <androidx.recyclerview.widget.RecyclerView
@@ -19,33 +20,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Your favourites -->
+    <!-- Your favourites title -->
     <TextView
         android:id="@+id/favText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Your favourites"
+        android:text="Những bài hát yêu thích"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_18ssp"
+        android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/_16sdp"
         app:layout_constraintTop_toBottomOf="@id/playListRecycler"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="@dimen/_16sdp"/>
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <!-- Favourites List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/favRecycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginTop="8dp"
         android:paddingStart="@dimen/_16sdp"
         android:paddingEnd="@dimen/_16sdp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/favText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/item_song"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_song"/>
 
+</androidx.constraintlayout.widget.ConstraintLayout>

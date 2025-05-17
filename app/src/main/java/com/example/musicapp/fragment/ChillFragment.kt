@@ -2,6 +2,7 @@ package com.example.myapplication.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,27 +11,34 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.View.S3Activity
 import com.example.myapplication.View.S4Activity
-import com.example.myapplication.ViewModel.PlaylistViewModel
-import com.example.myapplication.ViewModel.SongViewModel
-import com.example.myapplication.adapter.PlaylistAdapter
+import com.example.myapplication.adapter.CategoryAdapter
 import com.example.myapplication.adapter.SongAdapter
 import com.example.myapplication.databinding.FragmentChillBinding
-import com.example.myapplication.model.Playlist
+import com.example.myapplication.model.Artist
+import com.example.myapplication.model.Category
 import com.example.myapplication.model.Song
+import com.example.myapplication.viewmodel.ArtistViewModel
+import com.example.myapplication.viewmodel.CategoryViewModel
+import com.example.myapplication.viewmodel.SongViewModel
 
 class ChillFragment : Fragment() {
 
     private var _binding: FragmentChillBinding? = null
     private val binding get() = _binding!!
 
-    private val playlistViewModel: PlaylistViewModel by viewModels()
     private val songViewModel: SongViewModel by viewModels()
+    private val categoryViewModel: CategoryViewModel by viewModels()
+    private val artistViewModel: ArtistViewModel by viewModels()
 
-    private lateinit var playlistAdapter: PlaylistAdapter
+    private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var songAdapter: SongAdapter
 
+    private var songsData: List<Song> = emptyList()
+    private var artistsData: List<com.example.myapplication.model.Artist> = emptyList()
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChillBinding.inflate(inflater, container, false)
         return binding.root
@@ -38,61 +46,93 @@ class ChillFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerViews()
         observeViewModels()
     }
 
     private fun setupRecyclerViews() {
-        // Setup danh sách playlist (ngang)
-        playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            goToPlaylistDetail(playlist)
+        categoryAdapter = CategoryAdapter(emptyList()) { category ->
+            goToCategoryDetail(category)
         }
         binding.playListRecycler.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            adapter = playlistAdapter
+            adapter = categoryAdapter
         }
 
-        // Setup danh sách bài hát (dọc)
         songAdapter = SongAdapter(emptyList()) { song ->
             goToSongDetail(song)
         }
+
         binding.favRecycler.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = songAdapter
         }
+
     }
+
+    private var allArtists: List<Artist> = emptyList()
+    private var allSongs: List<Song> = emptyList()
 
     private fun observeViewModels() {
-        playlistViewModel.playlists.observe(viewLifecycleOwner) {
-            playlistAdapter.setData(it)
+        Log.d("ChillFragment", "observeViewModels() called")
+
+        categoryViewModel.categories.observe(viewLifecycleOwner) {
+            categoryAdapter.setData(it)
+        }
+//        categoryViewModel.categories.observe(viewLifecycleOwner) { categories ->
+//            categoryAdapter.setData(categories)
+//        }
+
+
+        artistViewModel.artists.observe(viewLifecycleOwner) { artists ->
+            allArtists = artists
+            Log.d("ChillFragment", "Đã load artists: $artists")
+            tryUpdateSongList()
+        }
+        songViewModel.songs.observe(viewLifecycleOwner) { songs ->
+            allSongs = songs
+            Log.d("ChillFragment", "Đã load songs: $songs")
+            tryUpdateSongList()
         }
 
-        songViewModel.songs.observe(viewLifecycleOwner) {
-            songAdapter.setData(it)
+    }
+
+    private fun tryUpdateSongList() {
+        if (allArtists.isNotEmpty() && allSongs.isNotEmpty()) {
+            songAdapter.updateList(allSongs)
         }
     }
 
-    private fun goToPlaylistDetail(playlist: Playlist) {
+
+
+    private fun goToCategoryDetail(category: Category) {
         val intent = Intent(requireContext(), S3Activity::class.java).apply {
-            putExtra("playlist_name", playlist.name)
-            putExtra("playlist_desc", playlist.description)
-            putExtra("playlist_image", playlist.imageResId)
+            putExtra("category_id", category.id)
+            putExtra("category_name", category.name)
+            putExtra("category_image", category.image)
         }
         startActivity(intent)
     }
 
     private fun goToSongDetail(song: Song) {
-        val intent = Intent(requireContext(), S4Activity::class.java).apply {
-            putExtra("song_title", song.title)
-            putExtra("song_artist", song.artist)
-            putExtra("song_image", song.imageResId)
+        val currentSongList = allSongs.toCollection(ArrayList())
+        val index = currentSongList.indexOfFirst { it.id == song.id }
+        if (index != -1) {
+            val intent = Intent(requireContext(), S4Activity::class.java).apply {
+                putExtra("song_id", song.id)
+                putExtra("song_title", song.title)
+                putExtra("song_image", song.image)
+                putExtra("song_url", song.url)
+                putParcelableArrayListExtra("song_list", currentSongList)
+                putExtra("current_index", index)
+            }
+            startActivity(intent)
         }
-        startActivity(intent)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
 }

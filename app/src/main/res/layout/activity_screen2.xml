@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient"
-    tools:context="com.example.myapplication.View.S2Activity">
+    tools:context=".View.S2Activity">
 
     <TextView
         android:id="@+id/welcomeText"
@@ -14,12 +14,12 @@
         android:layout_height="wrap_content"
         android:text="Welcome back!"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_12ssp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="@dimen/_24sdp"
-        android:layout_marginStart="@dimen/_16sdp" />
+        android:layout_marginTop="@dimen/_16sdp"
+        android:layout_marginStart="@dimen/_16sdp"/>
 
     <TextView
         android:id="@+id/subText"
@@ -27,13 +27,12 @@
         android:layout_height="wrap_content"
         android:text="What do you feel like today?"
         android:textColor="#BBBBBB"
-        android:textSize="@dimen/_8ssp"
+        android:textSize="@dimen/_6ssp"
         app:layout_constraintTop_toBottomOf="@id/welcomeText"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_4sdp" />
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginStart="@dimen/_16sdp"/>
 
-    <!-- Search Bar -->
     <EditText
         android:id="@+id/searchBar"
         android:layout_width="0dp"
@@ -49,10 +48,9 @@
         app:layout_constraintTop_toBottomOf="@id/subText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginEnd="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-    />
+        android:layout_marginEnd="@dimen/_16sdp"/>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
@@ -70,13 +68,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="@dimen/_8sdp"/>
 
-    <!-- ViewPager2 để chứa các Fragment -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_8sdp"
         app:layout_constraintTop_toBottomOf="@id/tabLayout"
+        app:layout_constraintBottom_toTopOf="@id/miniPlayerContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/_8sdp"/>
+
+    <!-- SỬA Ở ĐÂY: từ 64dp -> wrap_content để MiniPlayer tự co theo nội dung -->
+    <FrameLayout
+        android:id="@+id/miniPlayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

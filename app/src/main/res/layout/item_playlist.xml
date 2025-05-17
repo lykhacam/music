@@ -1,47 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/_140sdp"
+    android:layout_width="@dimen/_80sdp"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="@dimen/_12sdp"
-    android:paddingBottom="@dimen/_8sdp">
+    android:layout_marginEnd="@dimen/_12sdp">
 
-    <ImageView
-        android:id="@+id/playlistImage"
+    <FrameLayout
+        android:id="@+id/playlistContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/sample_playlist"
-        android:background="@drawable/image_round"
-        android:clipToOutline="true"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <TextView
-        android:id="@+id/playlistName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="RvB Playlist"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintTop_toBottomOf="@id/playlistImage"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="6dp"/>
+        app:layout_constraintDimensionRatio="1:1">
+
+        <ImageView
+            android:id="@+id/playlistImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_playlist"
+            android:background="@drawable/image_round"
+            android:clipToOutline="true" />
+
+        <TextView
+            android:id="@+id/playlistName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:padding="4dp"
+            android:text="RvB Playlist"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="@dimen/_10ssp"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/playlistDesc"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_2sdp"
         android:text="Chill your mind"
         android:textColor="#AAAAAA"
-        android:textSize="@dimen/_12ssp"
-        app:layout_constraintTop_toBottomOf="@id/playlistName"
+        android:textSize="@dimen/_10ssp"
+        app:layout_constraintTop_toBottomOf="@id/playlistContainer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="@dimen/_2sdp"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,49 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="@dimen/_8sdp"
-    android:gravity="center_vertical">
+    android:padding="@dimen/_6sdp"
+    android:gravity="center_vertical"
+    android:background="#66DEDBDB">
 
+    <!-- Ảnh bài hát -->
     <ImageView
         android:id="@+id/songImage"
-        android:layout_width="@dimen/_42sdp"
-        android:layout_height="@dimen/_42sdp"
-        android:background="@drawable/image_round"
-        android:clipToOutline="true"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
         android:scaleType="centerCrop"
-        android:src="@drawable/sample_avatar" />
+        android:src="@drawable/sample_avatar"
+        android:background="@drawable/image_round"
+        android:clipToOutline="true" />
 
+    <!-- Thông tin bài hát -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_marginStart="@dimen/_12sdp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/songTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bye Bye"
+            android:text="Song Title"
             android:textColor="@android:color/white"
-            android:textStyle="bold"/>
-
+            android:textSize="@dimen/_10ssp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+        <ImageView
+            android:id="@+id/downloadStatus"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_download"
+            android:visibility="gone"
+            app:tint="@color/green"/>
         <TextView
             android:id="@+id/songArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Marshmello, Juice WRLD"
+            android:text="Artist Name"
             android:textColor="#AAAAAA"
-            android:textSize="@dimen/_12ssp"/>
+            android:textSize="@dimen/_9ssp"
+            android:maxLines="1"
+            android:ellipsize="end" />
     </LinearLayout>
 
+
+    <!-- Thời lượng -->
     <TextView
         android:id="@+id/songDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2:09"
-        android:textColor="#AAAAAA"
-        android:textSize="@dimen/_12ssp"/>
-
+        android:text="3:45"
+        android:textColor="#BBBBBB"
+        android:textSize="@dimen/_9ssp"
+        android:layout_marginEnd="@dimen/_4sdp"/>
 </LinearLayout>

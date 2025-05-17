@@ -6,68 +6,84 @@
     android:background="@drawable/bg_gradient"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/_40sdp"
+    android:paddingTop="@dimen/_24sdp"
     android:paddingStart="@dimen/_20sdp"
     android:paddingEnd="@dimen/_20sdp"
     android:paddingBottom="@dimen/_40sdp"
     tools:context="com.example.myapplication.View.S4Activity">
 
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
+    <!-- Các nút điều khiển nhỏ: shuffle và repeat đưa lên sau để đảm bảo không bị che -->
+    <include
+        layout="@layout/include_header_controls"
+        android:layout_width="match_parent"
+        android:id="@+id/iclHctl"
         android:layout_height="wrap_content"
-        android:src="@drawable/left_chevron"
-        android:background="@android:color/transparent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <ImageButton
-        android:id="@+id/btnMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/menu"
-        android:background="@android:color/transparent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-    <ImageView
-        android:id="@+id/imgMusic"
+
+    <FrameLayout
+        android:id="@+id/albumContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toBottomOf="@id/iclHctl"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnBack"
-        android:src="@drawable/img"
-        android:scaleType="centerCrop"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:clipToOutline="true"/>
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_marginTop="@dimen/_12sdp">
+
+        <!-- Các thanh giả lập hiệu ứng âm thanh -->
+        <com.example.myapplication.visualizer.CircularBarVisualizerView
+            android:id="@+id/visualizerView"
+            android:layout_width="@dimen/_200sdp"
+            android:layout_height="@dimen/_200sdp"
+            android:layout_gravity="center"/>
+
+
+        <!-- Ảnh bài hát -->
+        <ImageView
+            android:id="@+id/songImage"
+            android:layout_width="@dimen/_124sdp"
+            android:layout_height="@dimen/_124sdp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:background="@drawable/circle_mask"
+            android:clipToOutline="true"
+            android:src="@drawable/img" />
+    </FrameLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ctlName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/imgMusic"
+        app:layout_constraintTop_toBottomOf="@id/albumContainer"
         android:paddingTop="@dimen/_12sdp">
 
         <TextView
-            android:id="@+id/txtSong"
-            android:layout_width="wrap_content"
+            android:id="@+id/songTitle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="You Right"
-            android:textSize="@dimen/_30ssp"
+            android:textSize="@dimen/_20ssp"
             android:textStyle="bold"
+            android:textColor="@color/white"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textColor="@color/white"/>
+            app:layout_constraintEnd_toStartOf="@id/cbLike"/>
 
         <TextView
-            android:id="@+id/txtSinger"
+            android:id="@+id/songArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Doja Cat, The Weeknd"
-            android:textSize="@dimen/_20sdp"
-            app:layout_constraintTop_toBottomOf="@+id/txtSong"
+            android:textSize="@dimen/_16ssp"
+            app:layout_constraintTop_toBottomOf="@+id/songTitle"
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="#C1BBBB"/>
 
@@ -92,7 +108,6 @@
         android:progressTint="@android:color/white"
         android:thumbTint="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ctlName" />
 
@@ -106,8 +121,6 @@
         app:layout_constraintTop_toBottomOf="@id/sbPlay"
         app:layout_constraintStart_toStartOf="parent"/>
 
-
-    <!-- Tổng thời gian nhạc -->
     <TextView
         android:id="@+id/tvTotalTime"
         android:layout_width="wrap_content"
@@ -118,13 +131,16 @@
         app:layout_constraintTop_toBottomOf="@id/sbPlay"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Di chuyển btnRandom và btnRepeat xuống sau để đảm bảo nằm trên cùng -->
     <ImageButton
         android:id="@+id/btnRandom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="@android:color/transparent"
         android:src="@drawable/shuffle"
         android:layout_marginBottom="@dimen/_12sdp"
+        android:elevation="10dp"
+        android:translationZ="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -135,6 +151,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnRepeat"
         app:layout_constraintStart_toEndOf="@id/btnRandom">
+
         <ImageButton
             android:id="@+id/btnSkBack"
             android:layout_width="wrap_content"
@@ -146,13 +163,11 @@
             app:layout_constraintEnd_toStartOf="@id/btnPlay"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-
         <ImageButton
             android:id="@+id/btnPlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/play"
-
             app:layout_constraintStart_toEndOf="@id/btnSkBack"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="@dimen/_20sdp"
@@ -166,7 +181,6 @@
             android:src="@drawable/next_button"
             android:background="@android:color/transparent"
             app:layout_constraintTop_toTopOf="parent"
-
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -174,11 +188,14 @@
 
     <ImageButton
         android:id="@+id/btnRepeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/sync"
         android:background="@android:color/transparent"
+        android:elevation="10dp"
+        android:translationZ="10dp"
         android:layout_marginBottom="@dimen/_12sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
