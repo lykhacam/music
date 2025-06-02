@@ -24,6 +24,9 @@ class MusicService : Service() {
     private var timer: Timer? = null
     private var isPlaying: Boolean = false
     private var currentSong: Song? = null
+    private var lastPlayedSong: Song? = null
+    private var lastPlayedDuration: Int = 0
+    private var lastPlayedPosition: Int = 0
 
     companion object {
         const val ACTION_START_NEW = "ACTION_START_NEW"
@@ -82,6 +85,7 @@ class MusicService : Service() {
 
     private fun handleStartNew(intent: Intent) {
         val url = intent.getStringExtra(EXTRA_URL)
+        val category = intent.getStringExtra("EXTRA_CATEGORY") ?: ""
         val title = intent.getStringExtra(EXTRA_TITLE) ?: ""
         val artist = intent.getStringExtra(EXTRA_ARTIST) ?: ""
         val image = intent.getStringExtra(EXTRA_IMAGE) ?: ""
@@ -94,7 +98,7 @@ class MusicService : Service() {
                 image = image,
                 url = url,
                 duration = 0,
-                categoryIds = emptyList()
+                categoryIds = listOf(category)
             )
             startNewSong(url)
         }
@@ -112,19 +116,20 @@ class MusicService : Service() {
             setOnPreparedListener {
                 start()
                 this@MusicService.isPlaying = true
-                sendSessionId(audioSessionId) // Gửi sessionId ngay sau khi start()
+                sendSessionId(audioSessionId)
                 startSendingPosition()
                 displayNotification()
                 sendPlayState()
                 sendCurrentSongToMiniPlayer()
             }
             setOnCompletionListener {
+                Log.d("TestHistory", "🎵 Nhạc kết thúc – onCompletionListener")
                 currentSong?.let { song ->
+                    Log.d("TestHistory", "➡️ Gọi saveListeningHistory: ${song.title}")
                     HistoryUtils.saveListeningHistory(song, duration, duration)
-                }
+                } ?: Log.d("TestHistory", "⚠️ currentSong null tại onCompletion")
                 sendBothBroadcast(Intent(BROADCAST_COMPLETE))
             }
-
             prepareAsync()
         }
     }
@@ -162,6 +167,10 @@ class MusicService : Service() {
                         if (it.isPlaying) {
                             val currentPos = it.currentPosition / 1000
                             val duration = it.duration / 1000
+
+                            lastPlayedSong = currentSong
+                            lastPlayedPosition = currentPos
+                            lastPlayedDuration = duration
 
                             sendBothBroadcast(Intent(BROADCAST_POSITION).apply {
                                 putExtra("current_position", currentPos)
@@ -238,7 +247,6 @@ class MusicService : Service() {
                 setShowBadge(false)
                 enableVibration(false)
             }
-
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
@@ -246,7 +254,6 @@ class MusicService : Service() {
 
     private fun displayNotification() {
         val song = currentSong ?: return
-
         Thread {
             val bitmap = try {
                 Glide.with(this)
@@ -257,9 +264,7 @@ class MusicService : Service() {
             } catch (e: Exception) {
                 BitmapFactory.decodeResource(resources, R.drawable.img)
             }
-
             val playPauseIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(song.title)
                 .setContentText(song.artistNames.joinToString(", "))
@@ -274,7 +279,6 @@ class MusicService : Service() {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build()
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
             } else {
@@ -287,13 +291,16 @@ class MusicService : Service() {
         val intent = Intent(this, NotificationReceiver::class.java).apply {
             this.action = action
         }
-        return PendingIntent.getBroadcast(
-            this,
-            action.hashCode(),
-            intent,
+
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
+        return PendingIntent.getBroadcast(this, action.hashCode(), intent, flags)
     }
+
 
     private fun getContentIntent(): PendingIntent {
         val intent = Intent(this, S4Activity::class.java).apply {
@@ -306,12 +313,10 @@ class MusicService : Service() {
     }
 
     private fun playNext() {
-        mediaPlayer?.let {
-            currentSong?.let { song ->
-                HistoryUtils.saveListeningHistory(song, it.currentPosition, it.duration)
-            }
+        Log.d("TestHistory", "➡️ playNext() được gọi")
+        lastPlayedSong?.let { song ->
+            HistoryUtils.saveListeningHistory(song, lastPlayedPosition, lastPlayedDuration)
         }
-
         val list = GlobalStorage.currentSongList
         val nextIndex = (GlobalStorage.currentSongIndex + 1).let { if (it >= list.size) 0 else it }
         GlobalStorage.currentSongIndex = nextIndex
@@ -319,19 +324,15 @@ class MusicService : Service() {
         startNewSong(currentSong!!.url)
     }
 
-
     private fun playPrevious() {
-        mediaPlayer?.let {
-            currentSong?.let { song ->
-                HistoryUtils.saveListeningHistory(song, it.currentPosition, it.duration)
-            }
+        Log.d("TestHistory", "➡️ playPrevious() được gọi")
+        lastPlayedSong?.let { song ->
+            HistoryUtils.saveListeningHistory(song, lastPlayedPosition, lastPlayedDuration)
         }
-
         val list = GlobalStorage.currentSongList
         val previousIndex = (GlobalStorage.currentSongIndex - 1).let { if (it < 0) list.size - 1 else it }
         GlobalStorage.currentSongIndex = previousIndex
         currentSong = list[previousIndex]
         startNewSong(currentSong!!.url)
     }
-
 }

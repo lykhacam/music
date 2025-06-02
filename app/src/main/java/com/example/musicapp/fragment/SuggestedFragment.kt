@@ -2,28 +2,25 @@ package com.example.myapplication.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.View.S4Activity
 import com.example.myapplication.adapter.SongAdapter
 import com.example.myapplication.databinding.FragmentSongListBinding
 import com.example.myapplication.model.Song
-import com.example.myapplication.viewmodel.SongViewModel
+import com.example.myapplication.repository.RecommendationHelper
 
 class SuggestedFragment : Fragment() {
 
     private var _binding: FragmentSongListBinding? = null
     private val binding get() = _binding!!
 
-    private val songViewModel: SongViewModel by viewModels()
     private lateinit var songAdapter: SongAdapter
-
-    private val favoriteCategories = listOf("h_nhac_tre")
-    private val favoriteArtists = listOf("Sơn Tùng", "Đen")
+    private var recommendedSongs: List<Song> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,18 +42,14 @@ class SuggestedFragment : Fragment() {
             adapter = songAdapter
         }
 
-        songViewModel.songs.observe(viewLifecycleOwner) { songs ->
-            val filtered = songs.filter { song ->
-                song.categoryIds.any { it in favoriteCategories } ||
-                        song.artistNames.any { it in favoriteArtists }
-            }
-            songAdapter.updateList(filtered)
+        RecommendationHelper.getArtistBasedRecommendations { songs ->
+            recommendedSongs = songs
+            songAdapter.updateList(songs)
         }
     }
 
     private fun openSongDetail(song: Song) {
-        val songList = songViewModel.songs.value ?: return
-        val index = songList.indexOfFirst { it.id == song.id }
+        val index = recommendedSongs.indexOfFirst { it.id == song.id }
         if (index == -1) return
 
         val intent = Intent(requireContext(), S4Activity::class.java).apply {
@@ -64,8 +57,10 @@ class SuggestedFragment : Fragment() {
             putExtra("song_title", song.title)
             putExtra("song_image", song.image)
             putExtra("song_url", song.url)
-            putParcelableArrayListExtra("song_list", ArrayList(songList))
+            putExtra("EXTRA_CATEGORY", song.categoryIds.firstOrNull() ?: "")
+            putParcelableArrayListExtra("song_list", ArrayList(recommendedSongs))
             putExtra("current_index", index)
+            putExtra("source", "home") // đảm bảo S4Activity xử lý "home"
         }
         startActivity(intent)
     }

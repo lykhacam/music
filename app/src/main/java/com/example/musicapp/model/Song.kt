@@ -1,6 +1,7 @@
 package com.example.myapplication.model
 
 import android.os.Parcelable
+import com.google.firebase.database.Exclude
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -12,9 +13,10 @@ data class Song(
     val duration: Int = 0,
     val artistNames: List<String> = emptyList(),
     val categoryIds: List<String> = listOf(),
-    val isFeatured: Boolean = false,
     val count: Int = 0,
-    val isPlaying: Boolean = false,
-    val isPriority: Boolean = false,
-    var isDownloaded: Boolean = false
+
+    @get:Exclude var isPlaying: Boolean = false,
+    @get:Exclude var isFeatured: Boolean = false,
+    @get:Exclude var isPriority: Boolean = false,
+    @get:Exclude var isDownloaded: Boolean = false
 ) : Parcelable

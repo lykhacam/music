@@ -7,51 +7,74 @@ import com.google.firebase.database.FirebaseDatabase
 
 object HistoryUtils {
 
-    /**
-     * Lưu lịch sử nghe bài hát vào Firebase nếu đã nghe đủ phần trăm quy định.
-     *
-     * @param song Bài hát đã phát
-     * @param currentPosition Vị trí đang phát hiện tại (ms)
-     * @param duration Tổng thời lượng bài hát (ms)
-     * @param minPercent Phần trăm tối thiểu để tính là đã nghe (mặc định: 30%)
-     */
-    fun saveListeningHistory(song: Song, currentPosition: Int, duration: Int, minPercent: Int = 30) {
+    fun saveListeningHistory(
+        song: Song,
+        currentPosition: Int,
+        duration: Int
+    ) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Log.w("HistoryUtils", "Người dùng chưa đăng nhập, không thể lưu lịch sử")
+            Log.w("HistoryUtils", "⚠️ Người dùng chưa đăng nhập")
             return
         }
 
         if (duration <= 0) {
-            Log.w("HistoryUtils", "Thời lượng bài hát không hợp lệ: $duration ms")
+            Log.w("HistoryUtils", "⚠️ Thời lượng bài hát không hợp lệ: $duration ms")
             return
         }
 
         val percentPlayed = (currentPosition * 100) / duration
-        if (percentPlayed < minPercent) {
-            Log.d("HistoryUtils", "Bỏ qua '${song.title}' vì chỉ nghe $percentPlayed% (<$minPercent%)")
+        if (percentPlayed < 80) {
+            Log.d("HistoryUtils", "⏳ Chưa đủ 80% → không lưu")
             return
         }
 
-        val artistId = song.artistNames.firstOrNull().orEmpty()
-        val categoryId = song.categoryIds.firstOrNull().orEmpty()
+        val artistRaw = song.artistNames.firstOrNull().orEmpty()
+        val artistId = sanitizeKey(artistRaw)
 
-        val historyData = mapOf(
-            "songId" to song.id,
-            "percentPlayed" to percentPlayed,
-            "timestamp" to System.currentTimeMillis(),
-            "artistId" to artistId,
-            "categoryId" to categoryId
-        )
+        val db = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
+        val userRef = db.getReference("users/$uid/listeningHistory")
 
-        FirebaseDatabase.getInstance()
-            .getReference("users/$uid/listeningHistory")
-            .push()
-            .setValue(historyData)
-            .addOnSuccessListener {
-                Log.d("HistoryUtils", "✅ Đã lưu lịch sử: ${song.title} ($percentPlayed%)")
+        // Ghi thời gian và giới hạn 10 tác giả gần nhất
+        val timestamp = System.currentTimeMillis()
+        val artistTimeRef = userRef.child("artistTimestamps").child(artistId)
+        artistTimeRef.setValue(timestamp).addOnSuccessListener {
+            userRef.child("artistTimestamps").get().addOnSuccessListener { snapshot ->
+                val sorted = snapshot.children
+                    .mapNotNull { it.key?.let { k -> k to (it.getValue(Long::class.java) ?: 0L) } }
+                    .sortedByDescending { it.second }
+                    .take(10)
+                    .associate { it.first to it.second }
+
+                userRef.child("artistTimestamps").setValue(sorted)
+                Log.d("HistoryUtils", "🕓 Lưu artist timestamp='$artistRaw' ($artistId) = $timestamp")
             }
-            .addOnFailureListener { error ->
-                Log.e("HistoryUtils", "❌ Lỗi khi lưu lịch sử: ${error.message}", error)
-            }
+        }
+
+        // Lưu tổng phần trăm đã nghe của artist
+        val artistRef = userRef.child("artists").child(artistId)
+        artistRef.get().addOnSuccessListener { snapshot ->
+            val oldPercent = snapshot.value?.let {
+                if (it is Long || it is Int) (it as Number).toInt() else 0
+            } ?: 0
+            val newPercent = (oldPercent + percentPlayed).coerceAtMost(100)
+            artistRef.setValue(newPercent)
+            Log.d("HistoryUtils", "🎤 Lưu artist='$artistRaw' ($artistId) = $newPercent%")
+        }.addOnFailureListener {
+            Log.e("HistoryUtils", "❌ Lỗi khi đọc artist='$artistId'", it)
+        }
+    }
+
+    // Hàm lọc key hợp lệ cho Firebase (tránh crash do ký tự đặc biệt)
+    private fun sanitizeKey(key: String): String {
+        return key.lowercase()
+            .replace(".", "_")
+            .replace("#", "_")
+            .replace("$", "_")
+            .replace("[", "_")
+            .replace("]", "_")
+            .replace("(", "")
+            .replace(")", "")
+            .replace(" ", "_")
+            .replace("/", "_")
     }
 }

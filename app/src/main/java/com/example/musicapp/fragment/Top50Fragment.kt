@@ -61,6 +61,7 @@ class Top50Fragment : Fragment() {
             putExtra("song_title", song.title)
             putExtra("song_image", song.image)
             putExtra("song_url", song.url)
+            putExtra("EXTRA_CATEGORY", song.categoryIds.firstOrNull() ?: "")
             putParcelableArrayListExtra("song_list", ArrayList(songList))
             putExtra("current_index", index)
         }

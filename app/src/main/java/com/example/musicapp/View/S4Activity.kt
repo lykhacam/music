@@ -27,6 +27,7 @@ import com.example.myapplication.global.GlobalStorage
 import com.example.myapplication.model.Song
 import com.example.myapplication.service.MusicService
 import com.example.myapplication.bottomsheet.SongMenuBottomSheet
+import com.example.myapplication.utils.HistoryUtils
 import com.example.myapplication.viewmodel.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -74,7 +75,6 @@ class S4Activity : AppCompatActivity() {
             }
         }
     }
-
     private fun checkAndRequestBatteryOptimization() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -270,6 +270,7 @@ class S4Activity : AppCompatActivity() {
     }
 
     private fun playNext() {
+        saveHistoryBeforeSwitch()
         currentIndex = when (repeatMode) {
             RepeatMode.ONE -> currentIndex
             else -> (currentIndex + 1) % songList.size
@@ -278,6 +279,7 @@ class S4Activity : AppCompatActivity() {
     }
 
     private fun playPrevious() {
+        saveHistoryBeforeSwitch()
         currentIndex = when (repeatMode) {
             RepeatMode.ONE -> currentIndex
             else -> if (currentIndex - 1 < 0) songList.size - 1 else currentIndex - 1
@@ -286,6 +288,7 @@ class S4Activity : AppCompatActivity() {
     }
 
     private fun handleCompletion() {
+        saveHistoryBeforeSwitch()
         when (repeatMode) {
             RepeatMode.ONE -> playSong(currentIndex)
             RepeatMode.ALL -> playNext()
@@ -301,6 +304,18 @@ class S4Activity : AppCompatActivity() {
             }
         }
     }
+
+    private fun saveHistoryBeforeSwitch() {
+        val currentSong = songList.getOrNull(currentIndex) ?: return
+        val progress = binding.sbPlay.progress.toFloat()
+        val duration = binding.sbPlay.max.takeIf { it > 0 } ?: return
+        val percentPlayed = ((progress / duration) * 100).toInt()
+
+        Log.d("TestHistory", "➡️ saveListeningHistory: ${currentSong.title}")
+        HistoryUtils.saveListeningHistory(currentSong, percentPlayed, duration)
+    }
+
+
 
     private fun updateUI(song: Song) {
         binding.songTitle.text = song.title
@@ -383,6 +398,7 @@ class S4Activity : AppCompatActivity() {
     }
 
     private fun updateUIFromBroadcast(intent: Intent) {
+        currentIndex = GlobalStorage.currentSongIndex
         binding.songTitle.text = intent.getStringExtra("title") ?: ""
         binding.songArtist.text = intent.getStringExtra("artist") ?: ""
         Glide.with(this).load(intent.getStringExtra("image") ?: "").circleCrop().into(binding.songImage)

@@ -28,13 +28,16 @@ class SongAdapter(
         notifyDataSetChanged()
     }
 
-    inner class SongViewHolder(val binding: ItemSongBinding) :
+    inner class SongViewHolder(private val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
         fun bind(song: Song) {
-            val artistNames = song.artistNames.joinToString(", ")
+            // Bind thông tin cơ bản
             binding.songTitle.text = song.title
-            binding.songArtist.text = artistNames
+            binding.songArtist.text = song.artistNames.joinToString(", ")
             binding.songDuration.text = formatDuration(song.duration)
+
+            // Hiển thị biểu tượng tải xuống nếu có
             if (song.isDownloaded) {
                 binding.downloadStatus.setImageResource(R.drawable.ic_download)
                 binding.downloadStatus.visibility = View.VISIBLE
@@ -42,42 +45,41 @@ class SongAdapter(
                 binding.downloadStatus.visibility = View.GONE
             }
 
-            Glide.with(binding.root)
+            // Load ảnh
+            Glide.with(binding.root.context)
                 .load(song.image)
                 .placeholder(R.drawable.img)
                 .into(binding.songImage)
 
             // Highlight nếu đang phát
-            if (song.id == currentlyPlayingId) {
-                binding.itemContainer.setBackgroundResource(R.drawable.bg_song_highlight)
-                binding.songTitle.setTextColor(ContextCompat.getColor(binding.root.context, R.color.blue))
-                binding.songArtist.setTextColor(ContextCompat.getColor(binding.root.context, R.color.light_blue))
-            } else {
-                binding.itemContainer.setBackgroundColor(Color.TRANSPARENT)
-                binding.songTitle.setTextColor(Color.WHITE)
-                binding.songArtist.setTextColor(Color.GRAY)
-            }
+            val isPlaying = song.id == currentlyPlayingId
+            binding.itemContainer.setBackgroundResource(
+                if (isPlaying) R.drawable.bg_song_highlight else android.R.color.transparent
+            )
+            binding.songTitle.setTextColor(
+                ContextCompat.getColor(binding.root.context,
+                    if (isPlaying) R.color.blue else android.R.color.white)
+            )
+            binding.songArtist.setTextColor(
+                ContextCompat.getColor(binding.root.context,
+                    if (isPlaying) R.color.light_blue else android.R.color.darker_gray)
+            )
 
-            binding.root.setOnClickListener {
-                onClick(song)
-            }
+            // Xử lý khi nhấn vào bài hát
+            binding.root.setOnClickListener { onClick(song) }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
-        val binding = ItemSongBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
+        val binding = ItemSongBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return SongViewHolder(binding)
     }
-
-    override fun getItemCount(): Int = songList.size
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         holder.bind(songList[position])
     }
+
+    override fun getItemCount(): Int = songList.size
 
     private fun formatDuration(seconds: Int): String {
         val minutes = seconds / 60
