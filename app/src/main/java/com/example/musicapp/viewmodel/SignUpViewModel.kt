@@ -49,6 +49,7 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
 
                         val userData = mapOf(
                             "email" to userEmail,
+                            "role" to "user", // thêm phân quyền
                             "favorites" to mapOf("placeholder" to false),
                             "recentlyPlayed" to mapOf("placeholder" to 0L),
                             "playlists" to mapOf("placeholder" to mapOf("name" to "init", "songIds" to mapOf<String, Boolean>())),

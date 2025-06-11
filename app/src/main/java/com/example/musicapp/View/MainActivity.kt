@@ -23,6 +23,10 @@ import com.example.myapplication.viewmodel.MiniPlayerViewModelFactory
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,6 +60,24 @@ class MainActivity : AppCompatActivity() {
         val emailTextView = headerView.findViewById<TextView>(R.id.userEmail)
         emailTextView.text = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
 
+//        ADMIN thif có quyền kiểm duyệt bài hát upload từ user
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val userRef = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("users/$uid/role")
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val role = snapshot.getValue(String::class.java)
+                if (role == "admin") {
+                    navigationView.menu.findItem(R.id.nav_approve)?.isVisible = true
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("MainActivity", "Lỗi kiểm tra role: ${error.message}")
+            }
+        })
+//kiểm duyệt end
         drawerLayout = findViewById(R.id.drawerLayout)
         toolbar = findViewById(R.id.toolbar)
         navigationView = findViewById(R.id.navigationView)
@@ -92,6 +114,19 @@ class MainActivity : AppCompatActivity() {
                         .addToBackStack(null)
                         .commit()
                 }
+
+                R.id.nav_upload -> {
+                    startActivity(Intent(this, UploadSongActivity::class.java))
+                }
+                R.id.nav_approve -> {
+                    startActivity(Intent(this, AdminApproveActivity::class.java))
+                }
+
+                R.id.nav_change_password -> {
+                    val intent = Intent(this, ChangePasswordActivity::class.java)
+                    startActivity(intent)
+                }
+
                 R.id.nav_sign_out -> {
                     FirebaseAuth.getInstance().signOut()
                     val intent = Intent(this, SignInActivity::class.java)

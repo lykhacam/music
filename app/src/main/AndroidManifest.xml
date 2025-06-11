@@ -29,6 +29,15 @@
         <activity
             android:name="com.example.myapplication.View.S1Activity"
             android:exported="false" />
+        <activity
+            android:name="com.example.myapplication.View.ChangePasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.myapplication.View.AdminApproveActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.myapplication.View.UploadSongActivity"
+            android:exported="false" />
         <service
             android:name=".service.MusicService"
             android:exported="false"

@@ -12,6 +12,16 @@
     <item
         android:id="@+id/nav_favorite"
         android:title="❤️ Favorite Songs" />
+    <item
+        android:id="@+id/nav_upload"
+        android:title="Tải bài hát lên" />
+
+    <item
+        android:id="@+id/nav_approve"
+        android:title="Phê duyệt bài hát"
+        android:visible="false" /> <!-- Mặc định ẩn -->
+
+
 
     <item
         android:id="@+id/nav_change_password"

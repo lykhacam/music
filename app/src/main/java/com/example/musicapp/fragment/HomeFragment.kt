@@ -8,18 +8,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.View.S4Activity
-import com.example.myapplication.View.SignInActivity
 import com.example.myapplication.adapter.HomePagerAdapter
 import com.example.myapplication.adapter.SongAdapter
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.model.Song
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class HomeFragment : Fragment() {
@@ -28,14 +26,24 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val tabTitles = listOf("Gợi ý", "Top 50", "Khám phá")
+
     private val allSongs = mutableListOf<Song>()
     private lateinit var searchAdapter: SongAdapter
+
+    private var lastKey: String? = null
+    private val batchSize = 10
+    private var isLoading = false
+    private var hasMore = true  // ✅ Biến cờ: còn bài để load không?
+    private lateinit var dbRef: DatabaseReference
+
+    private var isViewActive = false  // Kiểm tra binding còn sống
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        isViewActive = true
         return binding.root
     }
 
@@ -44,22 +52,16 @@ class HomeFragment : Fragment() {
 
         val adapter = HomePagerAdapter(this)
         binding.viewPager.adapter = adapter
-
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = tabTitles[position]
         }.attach()
 
+        dbRef = FirebaseDatabase
+            .getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("songs")
+
         setupSearch()
         loadSongsFromFirebase()
-
-//        binding.welcomeText.setOnClickListener {
-//            FirebaseAuth.getInstance().signOut()
-//            Toast.makeText(requireContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show()
-//
-//            startActivity(Intent(requireContext(), SignInActivity::class.java))
-//            requireActivity().finish()
-//        }
-
     }
 
     private fun setupSearch() {
@@ -67,9 +69,8 @@ class HomeFragment : Fragment() {
             val intent = Intent(requireContext(), S4Activity::class.java).apply {
                 putParcelableArrayListExtra("song_list", ArrayList(allSongs))
                 putExtra("current_index", allSongs.indexOf(song))
-
+                putExtra("source", "search")
             }
-            intent.putExtra("source", "search")
             startActivity(intent)
         }
 
@@ -78,8 +79,8 @@ class HomeFragment : Fragment() {
 
         binding.searchBar.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                if (!isViewActive) return
                 val query = s.toString().trim().lowercase()
-                Log.d("Search", "Query: $query")
 
                 val isSearching = query.isNotEmpty()
                 binding.searchResultRecycler.isVisible = isSearching
@@ -91,6 +92,7 @@ class HomeFragment : Fragment() {
                         it.title.lowercase().contains(query) ||
                                 it.artistNames.joinToString(",").lowercase().contains(query)
                     }
+                    Log.d("Search", "🎯 Tìm thấy ${result.size} bài khớp với \"$query\"")
                     searchAdapter.updateList(result)
                 }
             }
@@ -98,29 +100,74 @@ class HomeFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        binding.searchResultRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (!isViewActive) return
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                val totalItemCount = layoutManager.itemCount
+
+                if (!isLoading && hasMore && lastVisibleItem >= totalItemCount - 2) {
+                    Log.d("LazyLoad", "📥 Gần cuối danh sách, bắt đầu load thêm...")
+                    loadSongsFromFirebase()
+                }
+            }
+        })
     }
 
     private fun loadSongsFromFirebase() {
-        val dbRef = FirebaseDatabase
-            .getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-            .getReference("songs")
+        if (isLoading || !isViewActive || !hasMore) return
+        isLoading = true
+        Log.d("LazyLoad", "🚀 Bắt đầu load batch mới...")
 
-        dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        var query: Query = dbRef.orderByKey().limitToFirst(batchSize + 1)
+        if (lastKey != null) {
+            query = dbRef.orderByKey().startAfter(lastKey).limitToFirst(batchSize + 1)
+        }
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val songs = mutableListOf<Song>()
-                for (child in snapshot.children) {
+                if (!isViewActive) return
+
+                val newSongs = mutableListOf<Song>()
+                val children = snapshot.children.toList()
+                Log.d("LazyLoad", "📦 Firebase trả về ${children.size} bài")
+
+                // Nếu < batchSize + 1 thì đã hết
+                if (children.size <= batchSize) {
+                    hasMore = false
+                    Log.d("LazyLoad", "⛔ Không còn bài mới để load thêm")
+                }
+
+                var count = 0
+                for (child in children) {
                     val song = child.getValue(Song::class.java)
-                    if (song != null) {
-                        songs.add(song)
+                    if (song != null && count < batchSize) {
+                        newSongs.add(song)
+                        lastKey = child.key
+                        count++
                     }
                 }
-                allSongs.clear()
-                allSongs.addAll(songs)
-                Log.d("Firebase", "Loaded ${songs.size} songs")
+
+                allSongs.addAll(newSongs)
+                Log.d("LazyLoad", "✅ Đã load ${newSongs.size} bài (tổng: ${allSongs.size})")
+
+                val currentQuery = binding.searchBar.text.toString().trim().lowercase()
+                if (currentQuery.isNotEmpty()) {
+                    val result = allSongs.filter {
+                        it.title.lowercase().contains(currentQuery) ||
+                                it.artistNames.joinToString(",").lowercase().contains(currentQuery)
+                    }
+                    searchAdapter.updateList(result)
+                }
+
+                isLoading = false
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Failed to load songs: ${error.message}")
+                isLoading = false
+                Log.e("Firebase", "❌ Lỗi khi load bài: ${error.message}")
             }
         })
     }
@@ -128,5 +175,6 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        isViewActive = false
     }
 }
