@@ -12,7 +12,7 @@ class CategoryViewModel : ViewModel() {
 
     init {
         val database = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-        val ref = database.getReference("categories")
+        val ref = database.getReference("playlist")
 
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

@@ -9,14 +9,14 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.View.S4Activity
 import com.example.myapplication.adapter.SongAdapter
-import com.example.myapplication.databinding.FragmentSongListBinding
+import com.example.myapplication.databinding.FragmentSongBinding
 import com.example.myapplication.model.Song
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class FavoritesFragment : Fragment() {
 
-    private var _binding: FragmentSongListBinding? = null
+    private var _binding: FragmentSongBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var adapter: SongAdapter
@@ -25,7 +25,7 @@ class FavoritesFragment : Fragment() {
     private val songList = mutableListOf<Song>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentSongListBinding.inflate(inflater, container, false)
+        _binding = FragmentSongBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -42,8 +42,8 @@ class FavoritesFragment : Fragment() {
             }
         }
 
-        binding.favRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.favRecycler.adapter = adapter
+        binding.recommendationRecycler.layoutManager = LinearLayoutManager(requireContext())
+        binding.recommendationRecycler.adapter = adapter
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app").reference
@@ -72,7 +72,10 @@ class FavoritesFragment : Fragment() {
         for (id in songIds) {
             songsRef.child(id).addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(Song::class.java)?.let { songList.add(it) }
+                    snapshot.getValue(Song::class.java)?.let { song ->
+                        song.isLiked = true // ✅ Gán trạng thái liked cho từng bài
+                        songList.add(song)
+                    }
                     count++
                     if (count == songIds.size) {
                         adapter.updateList(songList)
@@ -85,6 +88,7 @@ class FavoritesFragment : Fragment() {
             })
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

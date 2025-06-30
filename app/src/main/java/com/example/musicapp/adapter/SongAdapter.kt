@@ -1,6 +1,5 @@
 package com.example.myapplication.adapter
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,8 @@ class SongAdapter(
     private val onClick: (Song) -> Unit
 ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
-    private var currentlyPlayingId: String? = null
+    private var playingSongId: String? = null
+    private var onDelete: ((Song) -> Unit)? = null  // ✅ thêm hàm xoá nhưng không thay đổi constructor
 
     fun updateList(newSongs: List<Song>) {
         songList = newSongs
@@ -24,20 +24,23 @@ class SongAdapter(
     }
 
     fun setCurrentlyPlaying(songId: String?) {
-        currentlyPlayingId = songId
+        playingSongId = songId
         notifyDataSetChanged()
+    }
+
+    // ✅ Cho phép gán callback xoá ở nơi cần (ví dụ MySongsFragment)
+    fun setOnDeleteListener(listener: ((Song) -> Unit)?) {
+        onDelete = listener
     }
 
     inner class SongViewHolder(private val binding: ItemSongBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(song: Song) {
-            // Bind thông tin cơ bản
             binding.songTitle.text = song.title
             binding.songArtist.text = song.artistNames.joinToString(", ")
             binding.songDuration.text = formatDuration(song.duration)
 
-            // Hiển thị biểu tượng tải xuống nếu có
             if (song.isDownloaded) {
                 binding.downloadStatus.setImageResource(R.drawable.ic_download)
                 binding.downloadStatus.visibility = View.VISIBLE
@@ -45,28 +48,37 @@ class SongAdapter(
                 binding.downloadStatus.visibility = View.GONE
             }
 
-            // Load ảnh
             Glide.with(binding.root.context)
                 .load(song.image)
                 .placeholder(R.drawable.img)
                 .into(binding.songImage)
 
-            // Highlight nếu đang phát
-            val isPlaying = song.id == currentlyPlayingId
+            val isPlaying = song.id == playingSongId
             binding.itemContainer.setBackgroundResource(
                 if (isPlaying) R.drawable.bg_song_highlight else android.R.color.transparent
             )
             binding.songTitle.setTextColor(
-                ContextCompat.getColor(binding.root.context,
-                    if (isPlaying) R.color.blue else android.R.color.white)
+                ContextCompat.getColor(
+                    binding.root.context,
+                    if (isPlaying) R.color.blue else android.R.color.white
+                )
             )
             binding.songArtist.setTextColor(
-                ContextCompat.getColor(binding.root.context,
-                    if (isPlaying) R.color.light_blue else android.R.color.darker_gray)
+                ContextCompat.getColor(
+                    binding.root.context,
+                    if (isPlaying) R.color.light_blue else android.R.color.darker_gray
+                )
             )
 
-            // Xử lý khi nhấn vào bài hát
             binding.root.setOnClickListener { onClick(song) }
+
+            // ✅ Hiển thị nút xoá nếu listener được gán
+            if (onDelete != null) {
+                binding.btnDelete.visibility = View.VISIBLE
+                binding.btnDelete.setOnClickListener { onDelete?.invoke(song) }
+            } else {
+                binding.btnDelete.visibility = View.GONE
+            }
         }
     }
 

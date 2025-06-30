@@ -8,20 +8,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.View.S3Activity
-import com.example.myapplication.adapter.CategoryAdapter
+import com.example.myapplication.adapter.PlaylistAdapter
 import com.example.myapplication.databinding.FragmentExploreBinding
-import com.example.myapplication.model.Category
-import com.example.myapplication.viewmodel.CategoryViewModel
+import com.example.myapplication.model.Playlist
+import com.example.myapplication.viewmodel.PlaylistViewModel
 
 class ExploreFragment : Fragment() {
 
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
 
-    private val categoryViewModel: CategoryViewModel by viewModels()
-    private lateinit var categoryAdapter: CategoryAdapter
+    private val playlistViewModel: PlaylistViewModel by viewModels()
+    private lateinit var PlaylistAdapter: PlaylistAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,24 +35,25 @@ class ExploreFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        categoryAdapter = CategoryAdapter(emptyList()) { category ->
-            openPlaylist(category)
+        PlaylistAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            openPlaylist(playlist)
         }
 
         binding.playListRecycler.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-            adapter = categoryAdapter
+            layoutManager = GridLayoutManager(requireContext(), 2) // 3 cột
+            adapter = PlaylistAdapter
         }
 
-        categoryViewModel.categories.observe(viewLifecycleOwner) { categories ->
-            categoryAdapter.setData(categories)
+
+        playlistViewModel.playlists.observe(viewLifecycleOwner) { playlists ->
+            PlaylistAdapter.setData(playlists)
         }
     }
 
-    private fun openPlaylist(category: Category) {
+    private fun openPlaylist(playlist: Playlist) {
         val intent = Intent(requireContext(), S3Activity::class.java).apply {
-            putExtra("category_id", category.id)
-            putExtra("category_image", category.image)
+            putExtra("playlist_id", playlist.id)
+            putExtra("playlist_image", playlist.image)
         }
         startActivity(intent)
     }

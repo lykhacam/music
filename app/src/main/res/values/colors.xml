@@ -12,11 +12,13 @@
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
     <color name="purple_500">#6200EE</color>
+    <color name="yellow">#D9D412</color>
     <color name="green">#00FF66</color> <!-- Hoặc màu tùy bạn -->
     <color name="gray">#AAAAAA</color>
-    <color name="blue">#2979FF</color>
     <color name="md_theme_primary">#6750A4</color>
     <color name="md_theme_secondary">#625B71</color>
     <color name="md_theme_background">#FFFBFE</color>
-    <color name="light_blue">#66CCFF</color>
+    <color name="blue">#2196F3</color>
+    <color name="light_blue">#90CAF9</color>
+
 </resources>

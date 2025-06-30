@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="?attr/actionBarSize"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="16dp">
+
+        <!-- Tên bài hát -->
+        <EditText
+            android:id="@+id/etTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Tên bài hát"
+            android:background="@drawable/bg_edittext"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:padding="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Tác giả -->
+        <EditText
+            android:id="@+id/etArtist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Tác giả"
+            android:background="@drawable/bg_edittext"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/etTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Thể loại -->
+        <TextView
+            android:id="@+id/tvSelectCategory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Chọn thể loại"
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_selector"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/etArtist"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Tâm trạng -->
+        <TextView
+            android:id="@+id/tvSelectMood"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Chọn tâm trạng"
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_selector"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSelectCategory"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Thời điểm phù hợp -->
+        <TextView
+            android:id="@+id/tvSelectTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Chọn thời điểm phù hợp"
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_selector"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSelectMood"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Thời lượng -->
+        <EditText
+            android:id="@+id/etDuration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Thời lượng (giây)"
+            android:inputType="number"
+            android:background="@drawable/bg_edittext"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSelectTime"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Chọn file MP3 -->
+        <Button
+            android:id="@+id/btnSelectFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn file MP3"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/etDuration"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Chọn ảnh -->
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chọn ảnh bài hát"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/btnSelectFile"
+            app:layout_constraintTop_toTopOf="@id/btnSelectFile" />
+
+        <!-- Tên file -->
+        <TextView
+            android:id="@+id/tvFileName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Chưa chọn file"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/btnSelectFile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Checkbox chọn upload riêng tư -->
+        <CheckBox
+            android:id="@+id/cbPrivateUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chỉ mình tôi có thể nghe bài hát này"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvFileName"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Nút upload -->
+        <Button
+            android:id="@+id/btnUpload"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Tải lên"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/purple_500"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/cbPrivateUpload"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

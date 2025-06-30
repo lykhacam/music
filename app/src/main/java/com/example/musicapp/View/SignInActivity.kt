@@ -46,10 +46,10 @@ class SignInActivity : AppCompatActivity() {
             startActivity(Intent(this, SignUpActivity::class.java))
         }
 
-        // Điều hướng sang Quên mật khẩu
-//        binding.tvForgotPassword.setOnClickListener {
-//            startActivity(Intent(this, ForgotPasswordActivity::class.java))
-//        }
+//         Điều hướng sang Quên mật khẩu
+        binding.tvForgotPassword.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
 
         viewModel.error.observe(this) { message ->
             if (message != null) {

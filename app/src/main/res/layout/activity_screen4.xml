@@ -12,38 +12,41 @@
     android:paddingBottom="@dimen/_40sdp"
     tools:context="com.example.myapplication.View.S4Activity">
 
-    <!-- Các nút điều khiển nhỏ: shuffle và repeat đưa lên sau để đảm bảo không bị che -->
     <include
         layout="@layout/include_header_controls"
-        android:layout_width="match_parent"
         android:id="@+id/iclHctl"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"/>
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/albumContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_12sdp"
         app:layout_constraintTop_toBottomOf="@id/iclHctl"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintDimensionRatio="1:1"
-        android:layout_marginTop="@dimen/_12sdp">
+        app:layout_constraintDimensionRatio="1:1">
 
-        <!-- Các thanh giả lập hiệu ứng âm thanh -->
         <com.example.myapplication.visualizer.CircularBarVisualizerView
             android:id="@+id/visualizerView"
-            android:layout_width="@dimen/_200sdp"
-            android:layout_height="@dimen/_200sdp"
-            android:layout_gravity="center"/>
+            android:layout_width="@dimen/_180sdp"
+            android:layout_height="@dimen/_180sdp"
+            android:layout_gravity="center" />
+
+        <com.chibde.visualizer.CircleBarVisualizer
+            android:id="@+id/legacyVisualizerView"
+            android:layout_width="@dimen/_180sdp"
+            android:layout_height="@dimen/_180sdp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
 
-        <!-- Ảnh bài hát -->
         <ImageView
             android:id="@+id/songImage"
-            android:layout_width="@dimen/_124sdp"
-            android:layout_height="@dimen/_124sdp"
+            android:layout_width="@dimen/_110sdp"
+            android:layout_height="@dimen/_110sdp"
             android:layout_gravity="center"
             android:scaleType="centerCrop"
             android:background="@drawable/circle_mask"
@@ -51,20 +54,19 @@
             android:src="@drawable/img" />
     </FrameLayout>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ctlName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/albumContainer"
-        android:paddingTop="@dimen/_12sdp">
+        android:paddingTop="@dimen/_12sdp"
+        app:layout_constraintTop_toBottomOf="@id/albumContainer">
 
         <TextView
             android:id="@+id/songTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="You Right"
-            android:textSize="@dimen/_20ssp"
+            android:textSize="@dimen/_13ssp"
             android:textStyle="bold"
             android:textColor="@color/white"
             android:ellipsize="marquee"
@@ -75,17 +77,17 @@
             android:scrollHorizontally="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/cbLike"/>
+            app:layout_constraintEnd_toStartOf="@id/cbLike" />
 
         <TextView
             android:id="@+id/songArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Doja Cat, The Weeknd"
-            android:textSize="@dimen/_16ssp"
-            app:layout_constraintTop_toBottomOf="@+id/songTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            android:textColor="#C1BBBB"/>
+            android:textSize="@dimen/_10ssp"
+            android:textColor="#C1BBBB"
+            app:layout_constraintTop_toBottomOf="@id/songTitle"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <CheckBox
             android:id="@+id/cbLike"
@@ -96,106 +98,143 @@
             android:drawableStart="@drawable/ic_heart_image"
             android:checked="false"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <SeekBar
         android:id="@+id/sbPlay"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginBottom="@dimen/_36sdp"
         android:progressTint="@android:color/white"
         android:thumbTint="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ctlProgress"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ctlName" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/tvCurrentTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1:24"
+        android:text="00:00"
         android:textColor="@color/white"
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_14ssp"
         app:layout_constraintTop_toBottomOf="@id/sbPlay"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tvTotalTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="3:58"
+        android:text="00:00"
         android:textColor="@color/white"
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_14ssp"
         app:layout_constraintTop_toBottomOf="@id/sbPlay"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Di chuyển btnRandom và btnRepeat xuống sau để đảm bảo nằm trên cùng -->
-    <ImageButton
-        android:id="@+id/btnRandom"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/shuffle"
-        android:layout_marginBottom="@dimen/_12sdp"
-        android:elevation="10dp"
-        android:translationZ="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ctlProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_44sdp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnRepeat"
-        app:layout_constraintStart_toEndOf="@id/btnRandom">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/_1sdp">
 
+        <!-- Nút Shuffle (trái) -->
         <ImageButton
-            android:id="@+id/btnSkBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/back_button"
+            android:id="@+id/btnRandom"
+            android:layout_width="@dimen/_42sdp"
+            android:layout_height="match_parent"
             android:background="@android:color/transparent"
+            android:src="@drawable/ic_shuffle_off"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnPlay"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <ImageButton
-            android:id="@+id/btnPlay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/play"
-            app:layout_constraintStart_toEndOf="@id/btnSkBack"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginEnd="@dimen/_20sdp"
-            android:layout_marginStart="@dimen/_20sdp"
-            app:layout_constraintEnd_toStartOf="@id/btnSkNext" />
+            app:tint="@android:color/white" />
 
-        <ImageButton
-            android:id="@+id/btnSkNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/next_button"
-            android:background="@android:color/transparent"
+        <!-- Nhóm nút chính: Back - Play - Next -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/controlCenter"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/_20sdp"
+            android:paddingStart="@dimen/_20sdp"
+            app:layout_constraintStart_toEndOf="@id/btnRandom"
+            app:layout_constraintEnd_toStartOf="@id/btnRepeat"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed">
+
+            <ImageButton
+                android:id="@+id/btnSkBack"
+                android:layout_width="@dimen/_42sdp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_skip_previous_white_24"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="@android:color/white" />
+
+            <!-- Nút Play -->
+            <ImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="@dimen/_44sdp"
+                android:layout_height="@dimen/_44sdp"
+                android:layout_marginStart="@dimen/_24sdp"
+                android:layout_marginEnd="@dimen/_24sdp"
+                android:background="@drawable/bg_circle_play"
+                android:src="@drawable/ic_play_arrow_white_24"
+                android:visibility="visible"
+                app:layout_constraintStart_toEndOf="@id/btnSkBack"
+                app:layout_constraintEnd_toStartOf="@id/btnSkNext"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="@android:color/white" />
+
+            <!-- Nút Pause (ẩn mặc định) -->
+            <ImageButton
+                android:id="@+id/btnPause"
+                android:layout_width="@dimen/_44sdp"
+                android:layout_height="@dimen/_44sdp"
+                android:layout_marginStart="@dimen/_6sdp"
+                android:layout_marginEnd="@dimen/_6sdp"
+                android:background="@drawable/bg_circle_play"
+                android:src="@drawable/ic_pause_white_24"
+                android:visibility="gone"
+                app:layout_constraintStart_toEndOf="@id/btnSkBack"
+                app:layout_constraintEnd_toStartOf="@id/btnSkNext"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="@android:color/white" />
+
+
+            <ImageButton
+                android:id="@+id/btnSkNext"
+                android:layout_width="@dimen/_42sdp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_skip_next_white_24"
+                app:layout_constraintEnd_toEndOf="parent"
+
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="@android:color/white" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Nút Repeat (phải) -->
+        <ImageButton
+            android:id="@+id/btnRepeat"
+            android:layout_width="@dimen/_42sdp"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_repeat_all"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@android:color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ImageButton
-        android:id="@+id/btnRepeat"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/sync"
-        android:background="@android:color/transparent"
-        android:elevation="10dp"
-        android:translationZ="10dp"
-        android:layout_marginBottom="@dimen/_12sdp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

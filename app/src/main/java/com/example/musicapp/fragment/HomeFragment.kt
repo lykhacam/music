@@ -1,42 +1,40 @@
 package com.example.myapplication.fragment
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.View.S4Activity
 import com.example.myapplication.adapter.HomePagerAdapter
 import com.example.myapplication.adapter.SongAdapter
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.model.Song
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.firebase.database.*
+import okhttp3.*
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.IOException
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val tabTitles = listOf("Gợi ý", "Top 50", "Khám phá")
-
-    private val allSongs = mutableListOf<Song>()
+    private val tabTitles = listOf("Gợi ý", "Top 100", "Khám phá")
     private lateinit var searchAdapter: SongAdapter
-
-    private var lastKey: String? = null
-    private val batchSize = 10
-    private var isLoading = false
-    private var hasMore = true  // ✅ Biến cờ: còn bài để load không?
-    private lateinit var dbRef: DatabaseReference
-
-    private var isViewActive = false  // Kiểm tra binding còn sống
+    private var isViewActive = false
+    private var currentSearchResults: List<Song> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,19 +54,14 @@ class HomeFragment : Fragment() {
             tab.text = tabTitles[position]
         }.attach()
 
-        dbRef = FirebaseDatabase
-            .getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-            .getReference("songs")
-
         setupSearch()
-        loadSongsFromFirebase()
     }
 
     private fun setupSearch() {
         searchAdapter = SongAdapter(emptyList()) { song ->
             val intent = Intent(requireContext(), S4Activity::class.java).apply {
-                putParcelableArrayListExtra("song_list", ArrayList(allSongs))
-                putExtra("current_index", allSongs.indexOf(song))
+                putParcelableArrayListExtra("song_list", ArrayList(currentSearchResults))
+                putExtra("current_index", currentSearchResults.indexOf(song))
                 putExtra("source", "search")
             }
             startActivity(intent)
@@ -88,12 +81,7 @@ class HomeFragment : Fragment() {
                 binding.tabLayout.isVisible = !isSearching
 
                 if (isSearching) {
-                    val result = allSongs.filter {
-                        it.title.lowercase().contains(query) ||
-                                it.artistNames.joinToString(",").lowercase().contains(query)
-                    }
-                    Log.d("Search", "🎯 Tìm thấy ${result.size} bài khớp với \"$query\"")
-                    searchAdapter.updateList(result)
+                    searchFromCloudFunction(query)
                 }
             }
 
@@ -101,73 +89,71 @@ class HomeFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        binding.searchResultRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (!isViewActive) return
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-                val totalItemCount = layoutManager.itemCount
-
-                if (!isLoading && hasMore && lastVisibleItem >= totalItemCount - 2) {
-                    Log.d("LazyLoad", "📥 Gần cuối danh sách, bắt đầu load thêm...")
-                    loadSongsFromFirebase()
-                }
+        binding.searchBar.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                // Ẩn bàn phím
+                val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
+                true
+            } else {
+                false
             }
-        })
-    }
-
-    private fun loadSongsFromFirebase() {
-        if (isLoading || !isViewActive || !hasMore) return
-        isLoading = true
-        Log.d("LazyLoad", "🚀 Bắt đầu load batch mới...")
-
-        var query: Query = dbRef.orderByKey().limitToFirst(batchSize + 1)
-        if (lastKey != null) {
-            query = dbRef.orderByKey().startAfter(lastKey).limitToFirst(batchSize + 1)
         }
 
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (!isViewActive) return
+    }
 
-                val newSongs = mutableListOf<Song>()
-                val children = snapshot.children.toList()
-                Log.d("LazyLoad", "📦 Firebase trả về ${children.size} bài")
+    private fun searchFromCloudFunction(query: String) {
+        val url = "https://asia-southeast1-appmusicrealtime.cloudfunctions.net/searchSongs?q=$query"
 
-                // Nếu < batchSize + 1 thì đã hết
-                if (children.size <= batchSize) {
-                    hasMore = false
-                    Log.d("LazyLoad", "⛔ Không còn bài mới để load thêm")
-                }
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
 
-                var count = 0
-                for (child in children) {
-                    val song = child.getValue(Song::class.java)
-                    if (song != null && count < batchSize) {
-                        newSongs.add(song)
-                        lastKey = child.key
-                        count++
-                    }
-                }
-
-                allSongs.addAll(newSongs)
-                Log.d("LazyLoad", "✅ Đã load ${newSongs.size} bài (tổng: ${allSongs.size})")
-
-                val currentQuery = binding.searchBar.text.toString().trim().lowercase()
-                if (currentQuery.isNotEmpty()) {
-                    val result = allSongs.filter {
-                        it.title.lowercase().contains(currentQuery) ||
-                                it.artistNames.joinToString(",").lowercase().contains(currentQuery)
-                    }
-                    searchAdapter.updateList(result)
-                }
-
-                isLoading = false
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("SearchAPI", "❌ Failed: ${e.message}")
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                isLoading = false
-                Log.e("Firebase", "❌ Lỗi khi load bài: ${error.message}")
+            override fun onResponse(call: Call, response: Response) {
+                response.body?.string()?.let { json ->
+                    val jsonArray = JSONArray(json)
+                    val results = mutableListOf<Song>()
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        val artist = when (val artists = obj.opt("artistNames")) {
+                            is JSONArray -> List(artists.length()) { artists.getString(it) }
+                            is String -> listOf(artists)
+                            else -> emptyList()
+                        }
+                        val song = Song(
+                            id = obj.getString("id"),
+                            title = obj.optString("title"),
+                            artistNames = artist,
+                            url = obj.optString("url"),
+                            image = obj.optString("image"),
+                            categoryIds = obj.optJSONArray("categoryIds")?.let { arr ->
+                                List(arr.length()) { arr.getString(it) }
+                            } ?: emptyList(),
+                            playlistIds = obj.optJSONArray("playlistIds")?.let { arr ->
+                                List(arr.length()) { arr.getString(it) }
+                            } ?: emptyList(),
+                            moodIds = obj.optJSONArray("moodIds")?.let { arr ->
+                                List(arr.length()) { arr.getString(it) }
+                            } ?: emptyList(),
+                            suitableTimeIds = obj.optJSONArray("suitableTimeIds")?.let { arr ->
+                                List(arr.length()) { arr.getString(it) }
+                            } ?: emptyList(),
+                            count = obj.optInt("count"),
+                            duration = obj.optInt("duration")
+                        )
+                        results.add(song)
+                    }
+                    activity?.runOnUiThread {
+                        currentSearchResults = results
+                        searchAdapter.updateList(results)
+                    }
+                }
             }
         })
     }

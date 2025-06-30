@@ -2,10 +2,9 @@ package com.example.myapplication.model
 
 import java.io.Serializable
 
-class Playlist() : Serializable {
-    var id: Int = 0
+class Playlist () : Serializable{
+    var id: String? = null
     var name: String? = null
-    var description: String? = null
     var image: String? = null
-    var songs: List<Song> = emptyList()
+    var description: String? = null
 }

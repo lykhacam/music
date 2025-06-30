@@ -2,23 +2,24 @@ package com.example.myapplication.fragment
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.View.S4Activity
 import com.example.myapplication.adapter.SongAdapter
-import com.example.myapplication.databinding.FragmentSongListBinding
+import com.example.myapplication.databinding.FragmentSongBinding
 import com.example.myapplication.model.Song
-import com.example.myapplication.repository.RecommendationHelper
+import com.example.myapplication.viewmodel.RecommendationViewModel
 
 class SuggestedFragment : Fragment() {
 
-    private var _binding: FragmentSongListBinding? = null
+    private var _binding: FragmentSongBinding? = null
     private val binding get() = _binding!!
 
+    private val viewModel: RecommendationViewModel by viewModels()
     private lateinit var songAdapter: SongAdapter
     private var recommendedSongs: List<Song> = emptyList()
 
@@ -26,7 +27,7 @@ class SuggestedFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSongListBinding.inflate(inflater, container, false)
+        _binding = FragmentSongBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -37,15 +38,24 @@ class SuggestedFragment : Fragment() {
             openSongDetail(song)
         }
 
-        binding.favRecycler.apply {
+        binding.recommendationRecycler.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = songAdapter
         }
 
-        RecommendationHelper.getArtistBasedRecommendations { songs ->
+        // Quan sát danh sách bài hát được đề xuất
+        viewModel.recommendations.observe(viewLifecycleOwner) { songs ->
             recommendedSongs = songs
             songAdapter.updateList(songs)
         }
+
+        // Quan sát lỗi nếu có
+        viewModel.error.observe(viewLifecycleOwner) { e ->
+            e.printStackTrace()
+        }
+
+        // Gọi load
+        viewModel.loadRecommendations()
     }
 
     private fun openSongDetail(song: Song) {
@@ -60,7 +70,7 @@ class SuggestedFragment : Fragment() {
             putExtra("EXTRA_CATEGORY", song.categoryIds.firstOrNull() ?: "")
             putParcelableArrayListExtra("song_list", ArrayList(recommendedSongs))
             putExtra("current_index", index)
-            putExtra("source", "home") // đảm bảo S4Activity xử lý "home"
+            putExtra("source", "home")
         }
         startActivity(intent)
     }

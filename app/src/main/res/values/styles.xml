@@ -25,5 +25,16 @@
     <style name="WhiteTextTheme">
         <item name="android:textColor">#FFFFFF</item>
     </style>
+    <style name="RadioWhiteTheme">
+        <item name="android:buttonTint">@android:color/white</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="WhiteTextInput" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/white_selector</item>
+        <item name="endIconTint">@android:color/white</item>
+        <item name="boxBackgroundColor">@android:color/transparent</item>
+        <item name="android:textColorHint">@android:color/white</item>
+        <item name="hintTextColor">@color/text_input_hint_color</item>
+    </style>
 
 </resources>

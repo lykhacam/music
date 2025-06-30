@@ -2,4 +2,5 @@
     <string name="app_name">MusicApp</string>
     <string name="navigation_drawer_open">Mở menu</string>
     <string name="navigation_drawer_close">Đóng menu</string>
+    <string name="g_p_li_n_h"><![CDATA[Góp ý & Liên hệ]]></string>
 </resources>

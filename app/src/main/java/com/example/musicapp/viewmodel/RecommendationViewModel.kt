@@ -1,46 +1,27 @@
 package com.example.myapplication.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.myapplication.model.ListeningHistory
-import com.example.myapplication.repository.FirebaseRepository
+import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.RecommendationRepository
+import com.example.myapplication.model.Song
 
-class RecommendationViewModel(application: Application) : AndroidViewModel(application) {
+class RecommendationViewModel : ViewModel() {
 
-    private val repository = FirebaseRepository()
+    private val _recommendations = MutableLiveData<List<Song>>()
+    val recommendations: LiveData<List<Song>> get() = _recommendations
 
-    private val _topPreferences = MutableLiveData<Pair<String?, String?>>()
-    val topPreferences: LiveData<Pair<String?, String?>> get() = _topPreferences
+    private val _error = MutableLiveData<Exception>()
+    val error: LiveData<Exception> get() = _error
 
-    private val _history = MutableLiveData<List<ListeningHistory>>()
-    val history: LiveData<List<ListeningHistory>> get() = _history
-
-    fun loadListeningHistory() {
-        repository.getListeningHistory().observeForever { historyList ->
-            _history.value = historyList
-            analyzeListeningHistory(historyList)
-        }
-    }
-
-    private fun analyzeListeningHistory(historyList: List<ListeningHistory>) {
-        val artistCount = mutableMapOf<String, Double>()
-        val categoryCount = mutableMapOf<String, Double>()
-
-        for (item in historyList) {
-            val weight = item.percentPlayed / 100.0
-            if (item.artistId.isNotBlank()) {
-                artistCount[item.artistId] = artistCount.getOrDefault(item.artistId, 0.0) + weight
+    fun loadRecommendations() {
+        RecommendationRepository.fetchRecommendations(
+            onResult = { songs ->
+                _recommendations.postValue(songs) // SAFE for background thread
+            },
+            onError = {
+                _error.postValue(it)
             }
-            if (item.categoryId.isNotBlank()) {
-                categoryCount[item.categoryId] = categoryCount.getOrDefault(item.categoryId, 0.0) + weight
-            }
-        }
-
-        val topArtist = artistCount.maxByOrNull { it.value }?.key
-        val topCategory = categoryCount.maxByOrNull { it.value }?.key
-
-        _topPreferences.value = Pair(topCategory, topArtist)
+        )
     }
 }

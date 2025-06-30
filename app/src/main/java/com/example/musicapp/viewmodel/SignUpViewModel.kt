@@ -19,9 +19,15 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _success = MutableLiveData<Boolean>()
     val success: LiveData<Boolean> get() = _success
 
-    fun validateAndSignUp(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
-            _error.value = "Email and password cannot be empty"
+    fun validateAndSignUp(
+        email: String,
+        password: String,
+        fullName: String,
+        birthYear: String,
+        favoriteGenres: List<String>
+    ) {
+        if (email.isBlank() || password.isBlank() || fullName.isBlank() || birthYear.isBlank()) {
+            _error.value = "All fields must be filled"
             return
         }
 
@@ -32,6 +38,12 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
 
         if (password.length < 6) {
             _error.value = "Password must be at least 6 characters"
+            return
+        }
+
+        val birthYearInt = birthYear.toIntOrNull()
+        if (birthYearInt == null || birthYearInt !in 1900..2025) {
+            _error.value = "Birth year is invalid"
             return
         }
 
@@ -46,17 +58,17 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
                             "https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app"
                         ).getReference("users").child(uid)
 
-
                         val userData = mapOf(
                             "email" to userEmail,
-                            "role" to "user", // thêm phân quyền
+                            "fullName" to fullName,
+                            "birthYear" to birthYearInt,
+                            "favoriteGenres" to favoriteGenres,
+                            "role" to "user",
                             "favorites" to mapOf("placeholder" to false),
                             "recentlyPlayed" to mapOf("placeholder" to 0L),
                             "playlists" to mapOf("placeholder" to mapOf("name" to "init", "songIds" to mapOf<String, Boolean>())),
                             "downloads" to mapOf("placeholder" to false)
                         )
-
-
 
                         userRef.setValue(userData)
                             .addOnSuccessListener {

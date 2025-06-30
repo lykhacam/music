@@ -7,32 +7,23 @@ import com.example.myapplication.model.Playlist
 import com.google.firebase.database.*
 
 class PlaylistViewModel : ViewModel() {
-
     private val _playlists = MutableLiveData<List<Playlist>>()
-    val playlists: LiveData<List<Playlist>> get() = _playlists
-
-    private val databaseRef: DatabaseReference = FirebaseDatabase
-        .getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-        .getReference("categories")
+    val playlists: LiveData<List<Playlist>> = _playlists
 
     init {
-        fetchPlaylists()
-    }
+        val database = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
+        val ref = database.getReference("playlist")
 
-    private fun fetchPlaylists() {
-        databaseRef.addValueEventListener(object : ValueEventListener {
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val playlistList = mutableListOf<Playlist>()
-                for (playlistSnapshot in snapshot.children) {
-                    val playlist = playlistSnapshot.getValue(Playlist::class.java)
-                    playlist?.let { playlistList.add(it) }
+                val list = mutableListOf<Playlist>()
+                for (data in snapshot.children) {
+                    data.getValue(Playlist::class.java)?.let { list.add(it) }
                 }
-                _playlists.postValue(playlistList)
+                _playlists.value = list
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                // handle error
-            }
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 }

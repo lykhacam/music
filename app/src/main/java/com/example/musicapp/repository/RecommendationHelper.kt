@@ -13,7 +13,7 @@ object RecommendationHelper {
     fun getArtistBasedRecommendations(callback: (List<Song>) -> Unit) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return callback(emptyList())
 
-        // Bước 1: Lấy top 10 artist gần nhất
+        // Lấy top 10 artist gần nhất
         db.getReference("users/$uid/listeningHistory/artists")
             .orderByValue()
             .limitToLast(10)
@@ -22,12 +22,12 @@ object RecommendationHelper {
                     val topArtists = snapshot.children.mapNotNull { it.key }
                     Log.d("RecommendationHelper", "🎧 Top Artists: $topArtists")
 
-                    // Bước 2: Lấy toàn bộ bài hát
+                    // Lấy toàn bộ bài hát
                     songsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(songSnapshot: DataSnapshot) {
                             val allSongs = songSnapshot.children.mapNotNull { it.getValue(Song::class.java) }
 
-                            // Bước 3: Lọc các bài hát theo artist ưu tiên
+                            //Lọc các bài hát theo artist ưu tiên
                             val prioritySongs = allSongs.filter { song ->
                                 song.artistNames.any { artist ->
                                     val key = artist
@@ -39,12 +39,10 @@ object RecommendationHelper {
                                 }
                             }.shuffled()
 
-                            // Bước 4: Bổ sung nếu chưa đủ 50 bài
-                            // 🔹 B4: Bổ sung bài hát bất kỳ nếu chưa đủ 50 bài (random)
+                            //  Bổ sung bài hát bất kỳ nếu chưa đủ 50 bài (random)
                             val otherSongs = allSongs.filterNot { it in prioritySongs }.shuffled()
                             val finalList = (prioritySongs + otherSongs).take(50)
 
-//
                             Log.d("RecommendationHelper", "✅ Recommended songs: ${prioritySongs.map { it.title }}")
                             callback(finalList)
                         }

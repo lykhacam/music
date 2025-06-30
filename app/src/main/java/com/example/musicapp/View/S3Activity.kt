@@ -14,18 +14,12 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.adapter.SongAdapter
 import com.example.myapplication.databinding.ActivityScreen3Binding
-import com.example.myapplication.databinding.IncludeHeaderControlsBinding
 import com.example.myapplication.fragment.MiniPlayerFragment
 import com.example.myapplication.global.GlobalStorage
 import com.example.myapplication.model.Artist
 import com.example.myapplication.model.Song
 import com.example.myapplication.service.MusicService
-import com.example.myapplication.viewmodel.ArtistViewModel
-import com.example.myapplication.viewmodel.MiniPlayerViewModel
-import com.example.myapplication.viewmodel.MiniPlayerViewModelFactory
-import com.example.myapplication.viewmodel.SongViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.example.myapplication.viewmodel.*
 
 class S3Activity : AppCompatActivity() {
 
@@ -38,7 +32,7 @@ class S3Activity : AppCompatActivity() {
 
     private var artistList: List<Artist> = emptyList()
     private var filteredSongs: List<Song> = emptyList()
-    private var categoryId: String = ""
+    private var playlistId: String = ""
     private var isPlayingAll = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +45,7 @@ class S3Activity : AppCompatActivity() {
             MiniPlayerViewModelFactory(application)
         )[MiniPlayerViewModel::class.java]
 
-        setupHeaderControls()
+        setupBasicControls()
 
         supportFragmentManager.beginTransaction()
             .replace(binding.miniPlayerContainer.id, MiniPlayerFragment())
@@ -63,9 +57,9 @@ class S3Activity : AppCompatActivity() {
 
         updateMiniPlayerVisibility(miniPlayerViewModel.hasStartedPlaying.value ?: false)
 
-        categoryId = intent.getStringExtra("category_id") ?: ""
-        val categoryImage = intent.getStringExtra("category_image")
-        categoryImage?.let { Glide.with(this).load(it).into(binding.imgPlaylist) }
+        playlistId = intent.getStringExtra("playlist_id") ?: ""
+        val playlistImage = intent.getStringExtra("playlist_image")
+        playlistImage?.let { Glide.with(this).load(it).into(binding.imgPlaylist) }
 
         setupRecyclerView()
         observeViewModel()
@@ -92,30 +86,9 @@ class S3Activity : AppCompatActivity() {
         }
     }
 
-    private fun setupHeaderControls() {
-        val btnBack = binding.iclHctl.btnBack
-        val btnMenu = binding.iclHctl.btnMenu
-
+    private fun setupBasicControls() {
+        val btnBack = findViewById<ImageButton>(R.id.btnBack)
         btnBack.setOnClickListener { finish() }
-
-        btnMenu.setOnClickListener {
-            val currentSong = filteredSongs.getOrNull(GlobalStorage.currentSongIndex) ?: return@setOnClickListener
-            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
-            val favRef = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-                .getReference("users").child(uid).child("favorites")
-
-            favRef.child(currentSong.id).addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        favRef.child(currentSong.id).removeValue()
-                    } else {
-                        favRef.child(currentSong.id).setValue(true)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {}
-            })
-        }
     }
 
     private fun updateMiniPlayerVisibility(started: Boolean) {
@@ -137,9 +110,25 @@ class S3Activity : AppCompatActivity() {
 
     private fun observeViewModel() {
         artistViewModel.artists.observe(this) { artistList = it }
+
         songViewModel.songs.observe(this) { songs ->
-            filteredSongs = songs.filter { it.categoryIds.contains(categoryId) }
+            filteredSongs = songs.filter { it.playlistIds.contains(playlistId) }
             songAdapter.updateList(filteredSongs)
+
+            val playingId = GlobalStorage.currentSongList
+                .getOrNull(GlobalStorage.currentSongIndex)
+                ?.id
+
+            val matched = filteredSongs.any { it.id == playingId }
+
+            // ✅ Ghi log để kiểm tra highlight
+            android.util.Log.d("S3_Highlight", "playingId = $playingId, matched = $matched")
+
+            if (!playingId.isNullOrEmpty() && matched) {
+                songAdapter.setCurrentlyPlaying(playingId)
+            } else {
+                songAdapter.setCurrentlyPlaying(null)
+            }
         }
     }
 
@@ -190,26 +179,44 @@ class S3Activity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = MusicService.ACTION_REQUEST_UPDATE_MINI_PLAYER
+        }
+        startService(intent)
+
+        // ✅ Thử cập nhật lại bài hát đang phát nếu trùng
+        val currentId = GlobalStorage.currentSongList
+            .getOrNull(GlobalStorage.currentSongIndex)
+            ?.id
+
+        val matched = filteredSongs.any { it.id == currentId }
+
+        android.util.Log.d("S3_Highlight", "onResume → currentId = $currentId, matched = $matched")
+
+        if (!currentId.isNullOrEmpty() && matched) {
+            songAdapter.setCurrentlyPlaying(currentId)
+        } else {
+            songAdapter.setCurrentlyPlaying(null)
+        }
+    }
+
+
     override fun onStart() {
         super.onStart()
-        registerReceiver(songChangeReceiver, IntentFilter("ACTION_UPDATE_S4"), Context.RECEIVER_NOT_EXPORTED)
         registerReceiver(playStateReceiver, IntentFilter("ACTION_UPDATE_PLAY_STATE"), Context.RECEIVER_NOT_EXPORTED)
+        registerReceiver(songUpdateReceiver, IntentFilter("ACTION_UPDATE_S4"), Context.RECEIVER_NOT_EXPORTED)
     }
+
 
     override fun onStop() {
         super.onStop()
-        unregisterReceiver(songChangeReceiver)
         unregisterReceiver(playStateReceiver)
+        unregisterReceiver(songUpdateReceiver)
     }
 
-    private val songChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == "ACTION_UPDATE_S4") {
-                val playingId = intent.getStringExtra("id")
-                songAdapter.setCurrentlyPlaying(playingId)
-            }
-        }
-    }
 
     private val playStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -222,4 +229,22 @@ class S3Activity : AppCompatActivity() {
             }
         }
     }
+
+    private val songUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "ACTION_UPDATE_S4") {
+                val newPlayingId = intent.getStringExtra("id")
+                val matched = filteredSongs.any { it.id == newPlayingId }
+
+                android.util.Log.d("S3_Highlight", "📡 onReceive → newPlayingId = $newPlayingId, matched = $matched")
+
+                if (!newPlayingId.isNullOrEmpty() && matched) {
+                    songAdapter.setCurrentlyPlaying(newPlayingId)
+                } else {
+                    songAdapter.setCurrentlyPlaying(null)
+                }
+            }
+        }
+    }
+
 }

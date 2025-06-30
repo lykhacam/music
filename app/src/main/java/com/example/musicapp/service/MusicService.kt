@@ -72,7 +72,15 @@ class MusicService : Service() {
                 sendCurrentSongToMiniPlayer()
                 sendCurrentPlaybackPosition()
                 sendPlayState()
+
+                // ✅ Gửi lại ID bài hát hiện tại cho S3Activity
+                currentSong?.let { song ->
+                    sendBothBroadcast(Intent("ACTION_UPDATE_S4").apply {
+                        putExtra("id", song.id)
+                    })
+                }
             }
+
             ACTION_REQUEST_SESSION_ID -> mediaPlayer?.audioSessionId?.let { sendSessionId(it) }
         }
         return START_NOT_STICKY
@@ -121,6 +129,7 @@ class MusicService : Service() {
                 displayNotification()
                 sendPlayState()
                 sendCurrentSongToMiniPlayer()
+                broadcastCurrentSongId() // ✅ THÊM DÒNG NÀY VÀO ĐÂY
             }
             setOnCompletionListener {
                 Log.d("TestHistory", "🎵 Nhạc kết thúc – onCompletionListener")
@@ -199,15 +208,19 @@ class MusicService : Service() {
     }
 
     private fun sendCurrentSongToMiniPlayer() {
-        currentSong?.let { song ->
-            sendBothBroadcast(Intent(ACTION_UPDATE_MINI_PLAYER).apply {
-                putExtra("title", song.title)
-                putExtra("artist", song.artistNames.joinToString(", "))
-                putExtra("image", song.image)
-                putExtra("url", song.url)
-            })
+        if (!isPlaying || currentSong == null) {
+            Log.d("MusicService", "🚫 Không gửi MiniPlayer vì không có bài hát đang phát.")
+            return
         }
+
+        sendBothBroadcast(Intent(ACTION_UPDATE_MINI_PLAYER).apply {
+            putExtra("title", currentSong!!.title)
+            putExtra("artist", currentSong!!.artistNames.joinToString(", "))
+            putExtra("image", currentSong!!.image)
+            putExtra("url", currentSong!!.url)
+        })
     }
+
 
     private fun sendCurrentPlaybackPosition() {
         mediaPlayer?.let {
@@ -227,9 +240,19 @@ class MusicService : Service() {
         mediaPlayer?.release()
         mediaPlayer = null
         stopForeground(true)
+
+        // 🧹 Reset dữ liệu toàn cục
+        GlobalStorage.currentSongList = emptyList()
+        GlobalStorage.currentSongIndex = -1
+        currentSong = null
+        isPlaying = false
+
+        // 📣 Gửi lệnh ẩn MiniPlayer
         sendBothBroadcast(Intent("ACTION_STOP_MINI_PLAYER"))
+
         super.onDestroy()
     }
+
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         stopSelf()
@@ -335,4 +358,15 @@ class MusicService : Service() {
         currentSong = list[previousIndex]
         startNewSong(currentSong!!.url)
     }
+    private fun broadcastCurrentSongId() {
+        val currentIndex = GlobalStorage.currentSongIndex
+        val song = GlobalStorage.currentSongList.getOrNull(currentIndex) ?: return
+
+        val intent = Intent("ACTION_UPDATE_S4").apply {
+            putExtra("id", song.id)
+        }
+        sendBroadcast(intent)
+        Log.d("MusicService", "📡 Broadcast sent from MusicService: id=${song.id}")
+    }
+
 }

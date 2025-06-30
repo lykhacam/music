@@ -6,17 +6,21 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Song(
-    val id: String = "",
-    val title: String = "",
-    val image: String = "",
-    val url: String = "",
-    val duration: Int = 0,
-    val artistNames: List<String> = emptyList(),
-    val categoryIds: List<String> = listOf(),
-    val count: Int = 0,
+    var id: String = "",
+    var title: String = "",
+    var image: String = "",
+    var url: String = "",
+    var moodIds: List<String> = listOf(),
+    var suitableTimeIds: List<String> = listOf(),
+    var duration: Int = 0,
+    var artistNames: List<String> = emptyList(),
+    var categoryIds: List<String> = listOf(),
+    var count: Int = 0,
+    var playlistIds: List<String> = emptyList(),
 
     @get:Exclude var isPlaying: Boolean = false,
     @get:Exclude var isFeatured: Boolean = false,
     @get:Exclude var isPriority: Boolean = false,
-    @get:Exclude var isDownloaded: Boolean = false
+    @get:Exclude var isDownloaded: Boolean = false,
+    @get:Exclude var isLiked: Boolean = false
 ) : Parcelable

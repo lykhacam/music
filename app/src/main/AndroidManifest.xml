@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
+
+
 
 
 
@@ -29,15 +33,6 @@
         <activity
             android:name="com.example.myapplication.View.S1Activity"
             android:exported="false" />
-        <activity
-            android:name="com.example.myapplication.View.ChangePasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.myapplication.View.AdminApproveActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.myapplication.View.UploadSongActivity"
-            android:exported="false" />
         <service
             android:name=".service.MusicService"
             android:exported="false"
@@ -51,21 +46,23 @@
         <activity
             android:name="com.example.myapplication.View.SignUpActivity"
             android:exported="false" />
+
         <activity
             android:name="com.example.myapplication.View.MainActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.myapplication.View.ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.myapplication.View.SignInActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.example.myapplication.View.SignInActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.example.myapplication.View.ForgotPasswordActivity"
+            android:exported="false" />
 
     </application>
 

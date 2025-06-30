@@ -2,37 +2,36 @@ package com.example.myapplication.bottomsheet
 
 import android.Manifest
 import android.app.Activity
-import android.app.DownloadManager
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
+import android.os.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.myapplication.R
 import com.example.myapplication.databinding.BottomSheetSongMenuBinding
 import com.example.myapplication.model.Song
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.FirebaseDatabase
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
 
 class SongMenuBottomSheet(
     private val context: Context,
     private val song: Song,
     private val onLike: () -> Unit,
-    private val onDownload: () -> Unit
+    private val onDownload: () -> Unit,
+    private val onRemove: () -> Unit
 ) : BottomSheetDialogFragment() {
 
     private var _binding: BottomSheetSongMenuBinding? = null
     private val binding get() = _binding!!
-
-    private var isDownloaded = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +44,8 @@ class SongMenuBottomSheet(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        checkIfSongDownloaded()
+        checkDownloadStatusFromFirebase()
+        checkFavoriteStatusFromFirebase()
 
         binding.btnLike.setOnClickListener {
             onLike()
@@ -55,74 +55,30 @@ class SongMenuBottomSheet(
         binding.btnDownload.setOnClickListener {
             val activity = requireActivity()
             if (checkAndRequestPermission(activity)) {
-                downloadSongToDevice(context, song.url, song.title)
-                song.isDownloaded = true
-                addToDownloads(song.id)
-                onDownload()
-                Toast.makeText(context, "Đang tải bài hát...", Toast.LENGTH_SHORT).show()
+                if (song.isDownloaded) {
+                    deleteDownloadedSong(song)
+                } else {
+                    downloadAndSave(song)
+                }
             } else {
                 Toast.makeText(activity, "Vui lòng cấp quyền để tải xuống", Toast.LENGTH_SHORT).show()
             }
-            dismiss()
-        }
-
-        binding.btnShare.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, "Nghe thử bài hát này!")
-                putExtra(Intent.EXTRA_TEXT, "${song.title} - ${song.artistNames.joinToString()}\n${song.url}")
-            }
-            startActivity(Intent.createChooser(intent, "Chia sẻ qua"))
-        }
-
-        binding.btnAddToPlaylist.setOnClickListener {
-            Toast.makeText(context, "Đã thêm vào danh sách phát", Toast.LENGTH_SHORT).show()
-            dismiss()
         }
     }
 
-    private fun checkIfSongDownloaded() {
+    private fun checkDownloadStatusFromFirebase() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val ref = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-            .getReference("users").child(uid).child("downloads").child(song.id)
+            .getReference("users/$uid/downloads/${song.id}")
 
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                isDownloaded = snapshot.exists()
-                updateDownloadButton()
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
-    }
-
-    private fun updateDownloadButton() {
-        val tvLabel = binding.tvDownloadLabel
-        val btn = binding.btnDownload
-
-        if (isDownloaded) {
-            tvLabel.text = "Đã tải"
-            btn.isEnabled = false
-            btn.alpha = 0.5f
-        } else {
-            tvLabel.text = "Tải xuống"
-            btn.isEnabled = true
-            btn.alpha = 1.0f
+        ref.get().addOnSuccessListener { snapshot ->
+            song.isDownloaded = snapshot.exists()
+            updateDownloadButtonUI()
         }
     }
 
-
-    private fun downloadSongToDevice(context: Context, songUrl: String, songTitle: String) {
-        val request = DownloadManager.Request(Uri.parse(songUrl)).apply {
-            setTitle("Đang tải: $songTitle")
-            setDescription("Tải bài hát xuống thiết bị")
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "$songTitle.mp3")
-            setAllowedOverMetered(true)
-            setAllowedOverRoaming(true)
-        }
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        downloadManager.enqueue(request)
+    private fun updateDownloadButtonUI() {
+        binding.tvDownloadLabel.text = if (song.isDownloaded) "Xoá khỏi danh sách tải" else "Tải xuống"
     }
 
     private fun checkAndRequestPermission(activity: Activity): Boolean {
@@ -144,11 +100,106 @@ class SongMenuBottomSheet(
         }
     }
 
-    private fun addToDownloads(songId: String) {
+    private fun downloadAndSave(song: Song) {
+        activity?.runOnUiThread {
+            binding.tvDownloadLabel.text = "Đang tải..."
+            binding.tvDownloadLabel.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
+            binding.btnDownload.isEnabled = false
+        }
+
+        Thread {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder().url(song.url).build()
+                val response = client.newCall(request).execute()
+                if (!response.isSuccessful) throw Exception("Lỗi tải file")
+
+                val inputStream = response.body?.byteStream() ?: throw Exception("Stream null")
+                val dir = File(context.getExternalFilesDir(null), "DownloadedSongs")
+                if (!dir.exists()) dir.mkdirs()
+
+                val file = File(dir, "${song.id}.mp3")
+                val output = FileOutputStream(file)
+                inputStream.copyTo(output)
+                output.close()
+
+                saveDownloadToFirebase(song, file.absolutePath)
+
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "Đã tải xong bài hát", Toast.LENGTH_SHORT).show()
+                    song.isDownloaded = true
+                    updateDownloadButtonUI()
+                    binding.tvDownloadLabel.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                    binding.btnDownload.isEnabled = true
+                    onDownload()
+                    dismiss()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "Tải bài hát thất bại", Toast.LENGTH_SHORT).show()
+                    binding.tvDownloadLabel.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                    binding.btnDownload.isEnabled = true
+                }
+            }
+        }.start()
+    }
+
+    private fun deleteDownloadedSong(song: Song) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val file = File(context.getExternalFilesDir(null), "DownloadedSongs/${song.id}.mp3")
+        if (file.exists()) file.delete()
+
+        val ref = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("users/$uid/downloads/${song.id}")
+        ref.removeValue()
+
+        song.isDownloaded = false
+        updateDownloadButtonUI()
+        onRemove()
+
+        Toast.makeText(context, "Đã xoá khỏi danh sách tải", Toast.LENGTH_SHORT).show()
+        dismiss()
+    }
+
+    private fun saveDownloadToFirebase(song: Song, localPath: String) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val ref = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
-            .getReference("users").child(uid).child("downloads")
-        ref.child(songId).setValue(true)
+            .getReference("users/$uid/downloads/${song.id}")
+
+        val map = mapOf(
+            "title" to song.title,
+            "image" to song.image,
+            "artistNames" to song.artistNames,
+            "duration" to song.duration,
+            "localPath" to localPath
+        )
+
+        ref.setValue(map)
+    }
+
+    private fun checkFavoriteStatusFromFirebase() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val ref = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
+            .getReference("users/$uid/favorites/${song.id}")
+
+        ref.get().addOnSuccessListener { snapshot ->
+            song.isLiked = snapshot.exists()
+            updateLikeButtonUI()
+        }
+    }
+
+    private fun updateLikeButtonUI() {
+        binding.tvLikeLabel.text = if (song.isLiked) "Bỏ thích bài hát" else "Thích bài hát"
+        binding.tvLikeLabel.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                android.R.color.white
+            )
+        )
+        binding.ivLikeIcon.setImageResource(
+            if (song.isLiked) R.drawable.ic_heart_full else R.drawable.ic_heart_image
+        )
     }
 
     override fun onDestroyView() {

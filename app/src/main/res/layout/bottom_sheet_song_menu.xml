@@ -4,34 +4,38 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@drawable/bg_gradient"
     android:padding="16dp">
         <!-- Menu Items -->
-        <LinearLayout
-            android:id="@+id/btnLike"
-            android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/btnLike"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingVertical="12dp">
+
+        <ImageView
+            android:id="@+id/ivLikeIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_heart_image"
+            app:tint="@android:color/white" />
+
+        <TextView
+            android:id="@+id/tvLikeLabel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:paddingVertical="12dp">
+            android:text="Thích bài hát"
+            android:textColor="@android:color/white"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:layout_marginStart="16dp" />
+    </LinearLayout>
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_heart_image"
-                app:tint="?attr/colorOnSurface" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Thích bài hát"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                android:layout_marginStart="16dp" />
-        </LinearLayout>
-
-        <LinearLayout
+    <LinearLayout
             android:id="@+id/btnDownload"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,13 +50,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_download"
-                app:tint="?attr/colorOnSurface" />
+                app:tint="@android:color/white" />
 
             <TextView
                 android:id="@+id/tvDownloadLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tải xuống"
+                android:textColor="@android:color/white"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                 android:layout_marginStart="16dp" />
         </LinearLayout>
@@ -72,37 +77,15 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_share"
-                app:tint="?attr/colorOnSurface" />
+                app:tint="@android:color/white" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Chia sẻ bài hát"
+                android:textColor="@android:color/white"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                 android:layout_marginStart="16dp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/btnAddToPlaylist"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:paddingVertical="12dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_playlist_add"
-                app:tint="?attr/colorOnSurface" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Thêm vào danh sách phát"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                android:layout_marginStart="16dp" />
-        </LinearLayout>
 </LinearLayout>

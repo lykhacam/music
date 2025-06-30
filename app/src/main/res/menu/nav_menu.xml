@@ -1,43 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/nav_home"
-        android:title="🏠 Home" />
-
-    <item
-        android:id="@+id/nav_library"
-        android:title="📚 Library" />
-
-    <item
-        android:id="@+id/nav_favorite"
-        android:title="❤️ Favorite Songs" />
-    <item
-        android:id="@+id/nav_upload"
-        android:title="Tải bài hát lên" />
-
-    <item
-        android:id="@+id/nav_approve"
-        android:title="Phê duyệt bài hát"
-        android:visible="false" /> <!-- Mặc định ẩn -->
-
-
-
-    <item
-        android:id="@+id/nav_change_password"
-        android:title="🛠 Change Password" />
-
-    <group android:checkableBehavior="none">
+    <!-- Nhóm người dùng thường -->
+    <group android:id="@+id/group_user">
         <item
-            android:id="@+id/nav_feedback"
-            android:title="✉️ Feedback" />
+            android:id="@+id/nav_home"
+            android:title="🏠 Trang chủ" />
+        <item
+            android:id="@+id/nav_library"
+            android:title="📚 Thư viện cá nhân" />
+        <item
+            android:id="@+id/nav_upload"
+            android:title="⬆️ Tải bài hát lên" />
+        <item
+            android:id="@+id/nav_my_songs"
+            android:title="🎵 Bài hát của tôi" />
+
+        <item
+            android:id="@+id/nav_change_password"
+            android:title="🛠 Đổi mật khẩu" />
         <item
             android:id="@+id/nav_contact"
-            android:title="📞 Contact" />
+            android:title="📞 Liên hệ" />
+        <item
+            android:id="@+id/nav_sign_out"
+            android:title="🚪 Đăng xuất" />
     </group>
 
-    <item
-        android:id="@+id/nav_sign_out"
-        android:title="🚪 Sign Out" />
+    <!-- Nhóm dành cho admin -->
+    <group android:id="@+id/group_admin" android:visible="false">
+        <item
+            android:id="@+id/nav_approve"
+            android:title="🛡 Phê duyệt bài hát"/>
+        <item
+            android:id="@+id/nav_manage_data"
+            android:title="🛡 Quản lý dữ liệu" />
+
+    </group>
 
 </menu>

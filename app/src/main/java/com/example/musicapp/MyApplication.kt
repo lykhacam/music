@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.firebase.FirebaseApp
+import com.google.firebase.database.FirebaseDatabase
 
 class MyApplication : Application(), ViewModelStoreOwner {
 
@@ -17,5 +18,8 @@ class MyApplication : Application(), ViewModelStoreOwner {
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
+        FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app").setPersistenceEnabled(true)
+
     }
+
 }

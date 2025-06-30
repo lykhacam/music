@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.View.S4Activity
 import com.example.myapplication.global.GlobalStorage
+import com.example.myapplication.model.Song
 import com.example.myapplication.service.MusicService
 import com.example.myapplication.viewmodel.MiniPlayerViewModel
 
@@ -35,15 +36,12 @@ class MiniPlayerFragment : Fragment() {
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("MiniPlayerFragment", "\uD83C\uDF1F onReceive: ${intent?.action}")
             when (intent?.action) {
                 MusicService.ACTION_UPDATE_MINI_PLAYER -> {
                     currentTitle = intent.getStringExtra("title")
                     currentArtist = intent.getStringExtra("artist")
                     currentImage = intent.getStringExtra("image")
                     currentUrl = intent.getStringExtra("url")
-
-                    Log.d("MiniPlayerFragment", "\u2705 update: $currentTitle - $currentArtist")
                     updateMiniPlayerUI()
                 }
                 MusicService.BROADCAST_POSITION -> {
@@ -63,17 +61,16 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_mini_player, container, false).apply {
-        imgSong = findViewById(R.id.imgSongMini)
-        tvTitle = findViewById(R.id.tvTitleMini)
-        tvArtist = findViewById(R.id.tvArtistMini)
-        btnPlayPause = findViewById(R.id.btnPlayPauseMini)
-        btnNext = findViewById(R.id.btnNextMini)
-        btnPrevious = findViewById(R.id.btnPreviousMini)
-        progressBar = findViewById(R.id.progressMini)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_mini_player, container, false).apply {
+            imgSong = findViewById(R.id.imgSongMini)
+            tvTitle = findViewById(R.id.tvTitleMini)
+            tvArtist = findViewById(R.id.tvArtistMini)
+            btnPlayPause = findViewById(R.id.btnPlayPauseMini)
+            btnNext = findViewById(R.id.btnNextMini)
+            btnPrevious = findViewById(R.id.btnPreviousMini)
+            progressBar = findViewById(R.id.progressMini)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -101,33 +98,39 @@ class MiniPlayerFragment : Fragment() {
         }
 
         btnNext.setOnClickListener {
-            val intent = Intent(requireContext(), MusicService::class.java).apply {
-                action = MusicService.ACTION_NEXT
-            }
-            requireContext().startService(intent)
+            val songList = GlobalStorage.currentSongList
+            val currentIndex = GlobalStorage.currentSongIndex
+            if (songList.isEmpty()) return@setOnClickListener
+
+            val nextIndex = (currentIndex + 1) % songList.size
+            val nextSong = songList[nextIndex]
+            GlobalStorage.currentSongIndex = nextIndex
+
+            playSong(nextSong)
         }
 
         btnPrevious.setOnClickListener {
-            val intent = Intent(requireContext(), MusicService::class.java).apply {
-                action = MusicService.ACTION_PREVIOUS
-            }
-            requireContext().startService(intent)
+            val songList = GlobalStorage.currentSongList
+            val currentIndex = GlobalStorage.currentSongIndex
+            if (songList.isEmpty()) return@setOnClickListener
+
+            val prevIndex = if (currentIndex - 1 < 0) songList.lastIndex else currentIndex - 1
+            val prevSong = songList[prevIndex]
+            GlobalStorage.currentSongIndex = prevIndex
+
+            playSong(prevSong)
         }
 
         progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
-
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                seekBar?.let {
-                    val newPos = it.progress
-                    val intent = Intent(requireContext(), MusicService::class.java).apply {
-                        action = MusicService.ACTION_SEEK_TO
-                        putExtra(MusicService.EXTRA_SEEK_POSITION, newPos)
-                    }
-                    requireContext().startService(intent)
+                val newPos = seekBar?.progress ?: 0
+                val intent = Intent(requireContext(), MusicService::class.java).apply {
+                    action = MusicService.ACTION_SEEK_TO
+                    putExtra(MusicService.EXTRA_SEEK_POSITION, newPos)
                 }
+                requireContext().startService(intent)
             }
         })
 
@@ -140,12 +143,28 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
-    private fun updateMiniPlayerUI() {
-        Log.d("MiniPlayerFragment", "\u23E9 updateMiniPlayerUI()")
+    private fun playSong(song: Song) {
+        val intent = Intent(requireContext(), MusicService::class.java).apply {
+            action = MusicService.ACTION_START_NEW
+            putExtra(MusicService.EXTRA_URL, song.url)
+            putExtra(MusicService.EXTRA_TITLE, song.title)
+            putExtra(MusicService.EXTRA_ARTIST, song.artistNames.joinToString(", "))
+            putExtra(MusicService.EXTRA_IMAGE, song.image)
+        }
+        requireContext().startService(intent)
 
+        // ✅ Gửi broadcast để S3Activity highlight
+        val broadcastIntent = Intent("ACTION_UPDATE_S4").apply {
+            putExtra("id", song.id)
+        }
+        requireContext().sendBroadcast(broadcastIntent)
+
+        Log.d("MiniPlayerFragment", "🎯 Broadcast sent: ${song.title} (id=${song.id})")
+    }
+
+    private fun updateMiniPlayerUI() {
         tvTitle.text = currentTitle ?: ""
         tvArtist.text = currentArtist ?: ""
-
         if (!currentImage.isNullOrEmpty()) {
             Glide.with(this).load(currentImage).into(imgSong)
         } else {
@@ -155,7 +174,6 @@ class MiniPlayerFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
         val filter = IntentFilter().apply {
             addAction(MusicService.ACTION_UPDATE_MINI_PLAYER)
             addAction(MusicService.BROADCAST_POSITION)
@@ -170,7 +188,7 @@ class MiniPlayerFragment : Fragment() {
                 requireContext().registerReceiver(receiver, filter)
             }
         } catch (e: Exception) {
-            Log.e("MiniPlayerFragment", "\uD83D\uDEA7 Failed to register receiver: ${e.message}")
+            Log.e("MiniPlayerFragment", "❌ Lỗi đăng ký receiver: ${e.message}")
         }
 
         requestCurrentSongInfo()
@@ -181,7 +199,7 @@ class MiniPlayerFragment : Fragment() {
         try {
             requireContext().unregisterReceiver(receiver)
         } catch (e: Exception) {
-            Log.e("MiniPlayerFragment", "\uD83D\uDEA7 Failed to unregister receiver: ${e.message}")
+            Log.e("MiniPlayerFragment", "❌ Lỗi hủy receiver: ${e.message}")
         }
     }
 

@@ -2,22 +2,21 @@ package com.example.myapplication.fragment
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.View.S4Activity
 import com.example.myapplication.adapter.SongAdapter
-import com.example.myapplication.databinding.FragmentSongListBinding
+import com.example.myapplication.databinding.FragmentSongBinding
 import com.example.myapplication.model.Song
 import com.example.myapplication.viewmodel.SongViewModel
 
 class Top50Fragment : Fragment() {
 
-    private var _binding: FragmentSongListBinding? = null
+    private var _binding: FragmentSongBinding? = null
     private val binding get() = _binding!!
 
     private val songViewModel: SongViewModel by viewModels()
@@ -33,7 +32,7 @@ class Top50Fragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSongListBinding.inflate(inflater, container, false)
+        _binding = FragmentSongBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -44,7 +43,7 @@ class Top50Fragment : Fragment() {
             openSongDetail(song)
         }
 
-        binding.favRecycler.apply {
+        binding.recommendationRecycler.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = songAdapter
 
@@ -60,14 +59,17 @@ class Top50Fragment : Fragment() {
             })
         }
 
-        songViewModel.songs.observe(viewLifecycleOwner) { songs ->
+        // ✅ Quan sát danh sách topSongs thay vì toàn bộ songs
+        songViewModel.topSongs.observe(viewLifecycleOwner) { songs ->
             topSongsFull.clear()
-            topSongsFull.addAll(songs.sortedByDescending { it.count }.take(50))
+            topSongsFull.addAll(songs)
 
             displayedSongs.clear()
             currentIndex = 0
             songAdapter.updateList(emptyList())
             loadMoreSongs()
+
+            Log.d("Top50Fragment", "✅ Top 100 bài hát theo count: ${songs.size}")
         }
     }
 

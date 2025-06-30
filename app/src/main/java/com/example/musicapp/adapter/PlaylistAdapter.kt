@@ -4,26 +4,31 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.myapplication.databinding.ItemPlaylistBinding
+import com.example.myapplication.databinding.ItemPlaylistBinding // Sử dụng lại layout cũ
 import com.example.myapplication.model.Playlist
 
 class PlaylistAdapter(
-    private var playlistList: List<Playlist>,
+    private var PlaylistList: List<Playlist>,
     private val onClick: (Playlist) -> Unit
 ) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     fun setData(newList: List<Playlist>) {
-        playlistList = newList
+        PlaylistList = newList
         notifyDataSetChanged()
     }
 
-    inner class PlaylistViewHolder(val binding: ItemPlaylistBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Playlist) {
-            binding.playlistName.text = item.name
-            Glide.with(binding.root).load(item.image).into(binding.playlistImage)
+    inner class PlaylistViewHolder(val binding: ItemPlaylistBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(Playlist: Playlist) {
+            binding.playlistName.isSelected = true
+            binding.playlistName.text = Playlist.name
+            binding.playlistDesc.text = Playlist.description
+
+            Glide.with(binding.root.context)
+                .load(Playlist.image)
+                .into(binding.playlistImage)
+
             binding.root.setOnClickListener {
-                onClick(item)
+                onClick(Playlist)
             }
         }
     }
@@ -33,9 +38,9 @@ class PlaylistAdapter(
         return PlaylistViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = playlistList.size
-
     override fun onBindViewHolder(holder: PlaylistViewHolder, position: Int) {
-        holder.bind(playlistList[position])
+        holder.bind(PlaylistList[position])
     }
+
+    override fun getItemCount(): Int = PlaylistList.size
 }
