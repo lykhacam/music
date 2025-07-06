@@ -129,10 +129,9 @@ class MusicService : Service() {
                 displayNotification()
                 sendPlayState()
                 sendCurrentSongToMiniPlayer()
-                broadcastCurrentSongId() // ✅ THÊM DÒNG NÀY VÀO ĐÂY
+                broadcastCurrentSongId()
             }
             setOnCompletionListener {
-                Log.d("TestHistory", "🎵 Nhạc kết thúc – onCompletionListener")
                 currentSong?.let { song ->
                     Log.d("TestHistory", "➡️ Gọi saveListeningHistory: ${song.title}")
                     HistoryUtils.saveListeningHistory(song, duration, duration)
@@ -200,7 +199,6 @@ class MusicService : Service() {
                         }
                     }
                 } catch (e: IllegalStateException) {
-                    Log.e("MusicService", "IllegalStateException in TimerTask: ${e.message}")
                     cancel()
                 }
             }

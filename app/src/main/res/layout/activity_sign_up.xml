@@ -15,7 +15,7 @@
             android:id="@+id/tvSignUpTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create Account"
+            android:text="Đăng ký"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
@@ -29,7 +29,7 @@
             android:id="@+id/edtFullName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Full Name"
+            android:hint="Tên đầy đủ"
             android:inputType="textPersonName"
             android:textColor="@android:color/white"
             android:textColorHint="#AAAAAA"
@@ -65,7 +65,7 @@
             android:id="@+id/edtPassword"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Password"
+            android:hint="Mật khẩu"
             android:inputType="textPassword"
             android:textColor="@android:color/white"
             android:textColorHint="#AAAAAA"
@@ -83,7 +83,7 @@
             android:id="@+id/edtBirthYear"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Birth Year (e.g. 2002)"
+            android:hint="Năm sinh"
             android:inputType="number"
             android:textColor="@android:color/white"
             android:textColorHint="#AAAAAA"
@@ -96,75 +96,16 @@
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp" />
 
-        <!-- Sở thích -->
-        <TextView
-            android:id="@+id/tvFavoriteGenres"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Favorite genres:"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/edtBirthYear"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp" />
-
-        <LinearLayout
-            android:id="@+id/layoutGenreCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/tvFavoriteGenres"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp">
-
-            <CheckBox
-                android:id="@+id/cbPop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pop"
-                android:textColor="@android:color/white" />
-
-            <CheckBox
-                android:id="@+id/cbLofi"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lofi"
-                android:textColor="@android:color/white" />
-
-            <CheckBox
-                android:id="@+id/cbNhacTre"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nhạc Trẻ"
-                android:textColor="@android:color/white" />
-
-            <CheckBox
-                android:id="@+id/cbRap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rap"
-                android:textColor="@android:color/white" />
-
-            <CheckBox
-                android:id="@+id/cbBolero"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bolero"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
 
         <!-- Nút đăng ký -->
         <Button
             android:id="@+id/btnSignUp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Sign Up"
+            android:text="Đăng ký"
             android:textColor="@android:color/white"
             android:background="@drawable/button_s1_background"
-            app:layout_constraintTop_toBottomOf="@id/layoutGenreCheckbox"
+            app:layout_constraintTop_toBottomOf="@id/edtBirthYear"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="24dp"
@@ -176,7 +117,7 @@
             android:id="@+id/tvGoToSignIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Already have an account? Sign in"
+            android:text="Bạn đã có tài khoản? Đăng nhập"
             android:textColor="#CCCCCC"
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@id/btnSignUp"

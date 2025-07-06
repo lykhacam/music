@@ -24,7 +24,7 @@ class ContactFragment : Fragment() {
         // 📧 Email
         binding.layoutEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:your_email@example.com") // Thay email bạn
+                data = Uri.parse("mailto:lykhacam65@gmail.com") // Thay email bạn
             }
             startActivity(Intent.createChooser(intent, "Chọn ứng dụng email"))
         }
@@ -32,7 +32,7 @@ class ContactFragment : Fragment() {
         // 📞 Gọi điện
         binding.layoutPhone.setOnClickListener {
             val intent = Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:0123456789") // Thay số của bạn
+                data = Uri.parse("tel:0362394289") // Thay số của bạn
             }
             startActivity(intent)
         }
@@ -40,7 +40,7 @@ class ContactFragment : Fragment() {
         // 🌐 Facebook
         binding.layoutFacebook.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("https://www.facebook.com/your.profile") // Thay link
+                data = Uri.parse("https://www.facebook.com/khac.uong.455167/about") // Thay link
             }
             startActivity(intent)
         }
@@ -48,7 +48,7 @@ class ContactFragment : Fragment() {
         // 💬 Zalo
         binding.layoutZalo.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("https://zalo.me/0123456789") // Thay số hoặc link
+                data = Uri.parse("https://zalo.me/0362394289") // Thay số hoặc link
             }
             startActivity(intent)
         }

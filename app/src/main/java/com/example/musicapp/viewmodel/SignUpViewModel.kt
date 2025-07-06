@@ -23,27 +23,26 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
         email: String,
         password: String,
         fullName: String,
-        birthYear: String,
-        favoriteGenres: List<String>
+        birthYear: String
     ) {
         if (email.isBlank() || password.isBlank() || fullName.isBlank() || birthYear.isBlank()) {
-            _error.value = "All fields must be filled"
+            _error.value = "Vui lòng điền đầy đủ tất cả các trường"
             return
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _error.value = "Invalid email format"
+            _error.value = "Email không đúng định dạng"
             return
         }
 
         if (password.length < 6) {
-            _error.value = "Password must be at least 6 characters"
+            _error.value = "Mật khẩu phải có ít nhất 6 ký tự"
             return
         }
 
         val birthYearInt = birthYear.toIntOrNull()
         if (birthYearInt == null || birthYearInt !in 1900..2025) {
-            _error.value = "Birth year is invalid"
+            _error.value = "Năm sinh không hợp lệ"
             return
         }
 
@@ -60,9 +59,7 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
 
                         val userData = mapOf(
                             "email" to userEmail,
-                            "fullName" to fullName,
                             "birthYear" to birthYearInt,
-                            "favoriteGenres" to favoriteGenres,
                             "role" to "user",
                             "favorites" to mapOf("placeholder" to false),
                             "recentlyPlayed" to mapOf("placeholder" to 0L),
@@ -72,19 +69,17 @@ class SignUpViewModel(private val app: Application) : AndroidViewModel(app) {
 
                         userRef.setValue(userData)
                             .addOnSuccessListener {
-                                Log.d("SignUpViewModel", "User data saved for UID: $uid")
                                 _success.value = true
                             }
                             .addOnFailureListener {
-                                Log.e("SignUpViewModel", "Failed to save user data: ${it.message}")
-                                _error.value = "Failed to save user data: ${it.message}"
+                                _error.value = "Không thể lưu dữ liệu người dùng: ${it.message}"
                             }
                     } else {
-                        _error.value = "User creation failed: UID or Email is null"
+                        _error.value = "Không thể tạo người dùng: Thiếu UID hoặc Email"
                     }
 
                 } else {
-                    _error.value = task.exception?.message ?: "Registration failed"
+                    _error.value = task.exception?.message ?: "Đăng ký thất bại"
                 }
             }
     }

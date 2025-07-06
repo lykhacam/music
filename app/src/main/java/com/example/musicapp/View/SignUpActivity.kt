@@ -32,19 +32,12 @@ class SignUpActivity : AppCompatActivity() {
             val fullName = binding.edtFullName.text.toString().trim()
             val birthYear = binding.edtBirthYear.text.toString().trim()
 
-            val favoriteGenres = mutableListOf<String>()
-            if (binding.cbPop.isChecked) favoriteGenres.add("pop")
-            if (binding.cbLofi.isChecked) favoriteGenres.add("lofi")
-            if (binding.cbNhacTre.isChecked) favoriteGenres.add("nhac_tre")
-            if (binding.cbRap.isChecked) favoriteGenres.add("rap")
-            if (binding.cbBolero.isChecked) favoriteGenres.add("bolero")
 
             viewModel.validateAndSignUp(
                 email = email,
                 password = password,
                 fullName = fullName,
-                birthYear = birthYear,
-                favoriteGenres = favoriteGenres
+                birthYear = birthYear
             )
         }
 
@@ -69,7 +62,6 @@ class SignUpActivity : AppCompatActivity() {
         viewModel.success.observe(this) { ok ->
             if (ok) {
                 val currentUser = FirebaseAuth.getInstance().currentUser
-                Log.d("FIREBASE_TEST", "Current user after sign up: ${currentUser?.email}")
                 Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
 
                 val intent = Intent(this, MainActivity::class.java)

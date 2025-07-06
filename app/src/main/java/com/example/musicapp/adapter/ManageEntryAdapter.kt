@@ -58,7 +58,9 @@ class ManageEntryAdapter(
                     val newId = etId.text.toString().trim()
                     val newName = etName.text.toString().trim()
                     if (newId.isNotBlank() && newName.isNotBlank()) {
-                        val updatedItem = ManageItem(newId, newName)
+                        val updatedItem = ManageItem(newId, newName).apply {
+                            firebaseKey = item.firebaseKey // 👈 giữ lại key gốc từ Firebase
+                        }
                         items[pos] = updatedItem
                         onSave(updatedItem)
                         notifyItemChanged(pos)

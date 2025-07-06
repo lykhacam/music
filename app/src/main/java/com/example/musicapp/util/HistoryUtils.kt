@@ -13,53 +13,53 @@ object HistoryUtils {
 
     fun saveListeningHistory(song: Song, currentPosition: Int, duration: Int) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Log.w("HistoryUtils", "⚠️ Người dùng chưa đăng nhập")
             return
         }
 
-        if (duration <= 0) {
-            Log.w("HistoryUtils", "⚠️ Thời lượng bài hát không hợp lệ: $duration")
-            return
-        }
+        if (duration <= 0) return
 
         val percentPlayed = (currentPosition * 100) / duration
         if (percentPlayed < 3) {
-            Log.d("HistoryUtils", "⏳ Dưới 3% → không lưu")
+            return
+        }
+
+        val songId = song.id
+        if (!songId.matches(Regex("^s\\d+$"))) {
             return
         }
 
         val db = FirebaseDatabase.getInstance("https://appmusicrealtime-default-rtdb.asia-southeast1.firebasedatabase.app")
         val historyRef = db.getReference("users/$uid/listeningHistory")
-        val songId = song.id
 
-        historyRef.child(songId).setValue(percentPlayed).addOnSuccessListener {
-            Log.d("HistoryUtils", "✅ Đã lưu $songId = $percentPlayed%")
+        val data = mapOf(
+            "percent" to percentPlayed,
+            "timestamp" to System.currentTimeMillis()
+        )
 
-            // Gọi Cloud Function để cập nhật user_vector
+        historyRef.child(songId).setValue(data).addOnSuccessListener {
             triggerGenerateUserVector(uid)
 
-            // Giới hạn tối đa 15 bài
+            // Giới hạn tối đa 15 bài gần nhất
             historyRef.get().addOnSuccessListener { snapshot ->
                 val entries = snapshot.children.mapNotNull { child ->
                     val id = child.key ?: return@mapNotNull null
-                    val percent = child.getValue(Int::class.java) ?: 0
-                    val time = child.ref.key?.hashCode() ?: 0
-                    Triple(id, percent, time.toLong())
+                    val timestamp = child.child("timestamp").getValue(Long::class.java) ?: return@mapNotNull null
+                    Pair(id, timestamp)
                 }
 
                 if (entries.size > 15) {
                     val toRemove = entries
-                        .sortedWith(compareBy<Triple<String, Int, Long>> { it.second }.thenBy { it.third })
+                        .sortedBy { it.second } // cũ nhất trước
                         .take(entries.size - 15)
 
                     toRemove.forEach {
                         historyRef.child(it.first).removeValue()
-                        Log.d("HistoryUtils", "🗑️ Xoá bài ${it.first} (${it.second}%)")
                     }
                 }
             }
         }
     }
+
 
     private fun triggerGenerateUserVector(uid: String) {
         val url = "https://asia-southeast1-appmusicrealtime.cloudfunctions.net/generateUserVector?uid=$uid"

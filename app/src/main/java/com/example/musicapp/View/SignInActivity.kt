@@ -30,7 +30,7 @@ class SignInActivity : AppCompatActivity() {
             return
         }
 
-        // ✅ Khởi tạo binding đúng cách
+        // Khởi tạo binding đúng cách
         binding = ActivitySignInBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

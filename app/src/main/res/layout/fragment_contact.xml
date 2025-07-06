@@ -45,7 +45,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
-                    android:text="📧 Email: your_email@example.com"
+                    android:text="📧 Email: lykhacam65@gmail.com"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -62,7 +62,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
-                    android:text="📞 Số điện thoại: 0123456789"
+                    android:text="📞 Số điện thoại: 0362394289"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -79,7 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
-                    android:text="🌐 Facebook: fb.com/your.profile"
+                    android:text="🌐 Facebook: Khắc Đường"
                     android:textSize="16sp" />
             </LinearLayout>
 
@@ -96,7 +96,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
-                    android:text="💬 Zalo: zalo.me/0123456789"
+                    android:text="💬 Zalo: Khắc Đường"
                     android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>

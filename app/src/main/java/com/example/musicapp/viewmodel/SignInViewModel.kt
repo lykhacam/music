@@ -20,17 +20,17 @@ class SignInViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun validateAndLogin(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _error.value = "Please enter both email and password"
+            _error.value = "Vui lòng nhập đầy đủ email và mật khẩu"
             return
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _error.value = "Invalid email format"
+            _error.value = "Email không đúng định dạng"
             return
         }
 
         if (password.length < 6) {
-            _error.value = "Password too short"
+            _error.value = "Mật khẩu quá ngắn (tối thiểu 6 ký tự)"
             return
         }
 
@@ -38,11 +38,9 @@ class SignInViewModel(private val app: Application) : AndroidViewModel(app) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    Log.d("SignInViewModel", "Login successful for UID: ${user?.uid}, email: ${user?.email}")
                     _success.value = true
                 } else {
-                    _error.value = task.exception?.message ?: "Login failed"
-                    Log.e("SignInViewModel", "Login error: ${task.exception?.message}")
+                    _error.value = task.exception?.message ?: "Đăng nhập thất bại"
                 }
             }
     }

@@ -41,12 +41,9 @@ class SongViewModel : ViewModel() {
                 val top = allSongs.sortedByDescending { it.count }
                     .take(100)
                 _topSongs.postValue(top)
-
-                Log.d("SongViewModel", "🎵 Total Songs: ${allSongs.size} | Top Songs: ${top.size}")
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("SongViewModel", "❌ Failed to fetch songs: ${error.message}")
             }
         })
     }

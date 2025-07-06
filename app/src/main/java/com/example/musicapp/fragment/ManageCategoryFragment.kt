@@ -33,10 +33,11 @@ class ManageCategoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = ManageEntryAdapter(itemList,
+        adapter = ManageEntryAdapter(
+            itemList,
             onSave = { item ->
-                db.child(item.id).setValue(item) // 👈 Lưu full object thay vì chỉ name
-                val index = itemList.indexOfFirst { it.id == item.id }
+                db.child(item.firebaseKey).setValue(item) // ✅ đúng key (c5, c6...)
+                val index = itemList.indexOfFirst { it.firebaseKey == item.firebaseKey }
                 if (index != -1) {
                     itemList[index] = item.copy()
                     adapter.notifyItemChanged(index)
@@ -44,13 +45,19 @@ class ManageCategoryFragment : Fragment() {
                 Toast.makeText(context, "Đã lưu ${item.name}", Toast.LENGTH_SHORT).show()
             },
             onDelete = { item ->
-                db.child(item.id).removeValue()
-                val index = itemList.indexOfFirst { it.id == item.id }
-                if (index != -1) {
-                    itemList.removeAt(index)
-                    adapter.notifyItemRemoved(index)
+                db.child(item.id).removeValue().addOnSuccessListener {
+                    val index = itemList.indexOfFirst { it.id == item.id }
+                    if (index in itemList.indices) {
+                        itemList.removeAt(index)
+                        adapter.notifyItemRemoved(index)
+                    } else {
+                        // fallback nếu index không hợp lệ
+                        adapter.notifyDataSetChanged()
+                    }
+                    Toast.makeText(context, "Đã xoá ${item.name}", Toast.LENGTH_SHORT).show()
+                }.addOnFailureListener {
+                    Toast.makeText(context, "Xoá thất bại", Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(context, "Đã xoá ${item.name}", Toast.LENGTH_SHORT).show()
             }
         )
 
@@ -58,19 +65,26 @@ class ManageCategoryFragment : Fragment() {
         binding.recyclerView.adapter = adapter
 
         binding.btnAdd.setOnClickListener {
-            val id = binding.etId.text.toString().trim()
+            val inputId = binding.etId.text.toString().trim()
             val name = binding.etName.text.toString().trim()
-            if (id.isNotEmpty() && name.isNotEmpty()) {
-                val newItem = ManageItem(id, name)
-                db.child(id).setValue(newItem) // 👈 Lưu cả id + name vào object
+
+            if (inputId.isEmpty() || name.isEmpty()) {
+                Toast.makeText(context, "Vui lòng nhập đầy đủ ID và tên", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            generateNextCategoryId { generatedKey ->
+                val newItem = ManageItem(id = inputId, name = name)
+                db.child(generatedKey).setValue(newItem)
                 itemList.add(newItem)
                 adapter.notifyItemInserted(itemList.size - 1)
+
                 binding.etId.setText("")
                 binding.etName.setText("")
-            } else {
-                Toast.makeText(context, "Vui lòng nhập đầy đủ ID và tên", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đã thêm $name với mã $inputId", Toast.LENGTH_SHORT).show()
             }
         }
+
 
         loadCategories()
     }
@@ -80,7 +94,9 @@ class ManageCategoryFragment : Fragment() {
             itemList.clear()
             snapshot.children.forEach {
                 val item = it.getValue(ManageItem::class.java)
-                if (item != null) {
+                val key = it.key
+                if (item != null && key != null) {
+                    item.firebaseKey = key  // Gán khóa Firebase cho mỗi item
                     itemList.add(item)
                 }
             }
@@ -88,6 +104,17 @@ class ManageCategoryFragment : Fragment() {
         }
     }
 
+
+    private fun generateNextCategoryId(onIdGenerated: (String) -> Unit) {
+        db.get().addOnSuccessListener { snapshot ->
+            val ids = snapshot.children.mapNotNull {
+                it.key?.removePrefix("c")?.toIntOrNull()
+            }
+            val nextNumber = (ids.maxOrNull() ?: 0) + 1
+            val newId = "c$nextNumber"
+            onIdGenerated(newId)
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
